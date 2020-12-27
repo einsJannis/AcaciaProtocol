@@ -190,6 +190,11 @@ class MappedDelegate<T, V>(val wrappedDelegate: BaseDelegate<V>, val from: (V) -
     }
 }
 
+enum class Bound {
+    CLIENT,
+    SERVER
+}
+
 enum class ConnectionState {
     HANDSHAKE,
     STATUS,
@@ -197,7 +202,7 @@ enum class ConnectionState {
     PLAY
 }
 
-abstract class PacketMeta<T : Packet>(val id: Int, val connectionState: ConnectionState, val constrctor: () -> T) {
+abstract class PacketMeta<T : Packet>(val id: Int, val connectionState: ConnectionState, val bound: Bound, val constrctor: () -> T) {
 
     fun readPacket(primitiveReader: PrimitiveReader): T {
         val packet = constrctor()
