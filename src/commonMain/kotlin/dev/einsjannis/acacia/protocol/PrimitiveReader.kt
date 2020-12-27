@@ -24,4 +24,5 @@ interface PrimitiveReader {
     fun readUUID(): UUID // TODO
     fun readXEnum(): Any // TODO
     fun readByteArray(size: Int): ByteArray
+    val remainingBytes: Int
 }
