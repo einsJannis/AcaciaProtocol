@@ -21,7 +21,6 @@ interface PrimitiveReader {
     fun readSlot(): Any// TODO
     fun readNBTTag(): Any // TODO
     fun readPosition(): Position
-    fun readAngle(): Any // TODO
     fun readUUID(): UUID // TODO
     fun readXEnum(): Any // TODO
     fun readByteArray(size: Int): ByteArray

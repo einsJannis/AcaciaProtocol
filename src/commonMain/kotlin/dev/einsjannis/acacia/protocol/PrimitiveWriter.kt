@@ -21,7 +21,6 @@ interface PrimitiveWriter {
     fun writeSlot(value: Any)// TODO
     fun writeNBTTag(value: Any) // TODO
     fun writePosition(value: Position)
-    fun writeAngle(value: Any) // TODO
     fun writeUUID(value: UUID) // TODO
     fun writeXEnum(value: Any) // TODO
     fun writeByteArray(value: ByteArray)
