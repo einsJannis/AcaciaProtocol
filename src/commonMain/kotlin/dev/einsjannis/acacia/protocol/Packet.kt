@@ -125,6 +125,11 @@ class IdentifierDelegate : BaseDelegate<Identifier>() {
     override fun write(writer: PrimitiveWriter, value: Identifier) = writer.writeIdentifier(value)
 }
 
+class PositionDelegate : BaseDelegate<Position>() {
+    override fun read(reader: PrimitiveReader): Position = reader.readPosition()
+    override fun write(writer: PrimitiveWriter, value: Position) = writer.writePosition(value)
+}
+
 class OptionalDelegate<T>(
     val elementDelegate: BaseDelegate<T>,
     val isPresent: () -> Boolean,
@@ -199,11 +204,11 @@ abstract class Packet {
     fun uuid() = delegate(UUIDDelegate())
     fun chat() = delegate(ChatDelegate())
     fun id() = delegate(IdentifierDelegate())
+    fun position() = delegate(PositionDelegate())
     /*
     fun writeEntityMetadata(value: Any) // TODO
     fun writeSlot(value: Any)// TODO
     fun writeNBTTag(value: Any) // TODO
-    fun writePosition(value: Any) // TODO
     fun writeAngle(value: Any) // TODO
     fun writeUUID(value: Any) // TODO
     fun writeXEnum(value: Any) // TODO

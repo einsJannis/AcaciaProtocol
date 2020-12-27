@@ -20,7 +20,7 @@ interface PrimitiveWriter {
     fun writeEntityMetadata(value: Any) // TODO
     fun writeSlot(value: Any)// TODO
     fun writeNBTTag(value: Any) // TODO
-    fun writePosition(value: Any) // TODO
+    fun writePosition(value: Position)
     fun writeAngle(value: Any) // TODO
     fun writeUUID(value: UUID) // TODO
     fun writeXEnum(value: Any) // TODO

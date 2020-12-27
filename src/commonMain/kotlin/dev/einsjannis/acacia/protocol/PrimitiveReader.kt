@@ -20,7 +20,7 @@ interface PrimitiveReader {
     fun readEntityMetadata(): Any // TODO
     fun readSlot(): Any// TODO
     fun readNBTTag(): Any // TODO
-    fun readPosition(): Any // TODO
+    fun readPosition(): Position
     fun readAngle(): Any // TODO
     fun readUUID(): UUID // TODO
     fun readXEnum(): Any // TODO
