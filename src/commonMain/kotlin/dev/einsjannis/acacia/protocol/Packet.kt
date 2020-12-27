@@ -1,6 +1,9 @@
 package dev.einsjannis.acacia.protocol
 
 import dev.einsjannis.acacia.protocol.chat.ChatComponent
+import dev.einsjannis.acacia.protocol.entity.EntityDataField
+import dev.einsjannis.acacia.protocol.nbt.NbtTag
+import dev.einsjannis.acacia.protocol.nbt.SlotData
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
@@ -138,6 +141,21 @@ class AngleDelegate : BaseDelegate<UByte>() {
     override fun write(writer: PrimitiveWriter, value: UByte) = writer.writeUnsignedByte(value)
 }
 
+class NbtTagDelegate : BaseDelegate<NbtTag>() {
+    override fun read(reader: PrimitiveReader): NbtTag = reader.readNBTTag()
+    override fun write(writer: PrimitiveWriter, value: NbtTag) = writer.writeNBTTag(value)
+}
+
+class SlotDelegate : BaseDelegate<SlotData>() {
+    override fun read(reader: PrimitiveReader): SlotData = reader.readSlot()
+    override fun write(writer: PrimitiveWriter, value: SlotData) = writer.writeSlot(value)
+}
+
+class EntityMetadataDelegate : BaseDelegate<List<EntityDataField>>() {
+    override fun read(reader: PrimitiveReader): List<EntityDataField> = reader.readEntityMetadata()
+    override fun write(writer: PrimitiveWriter, value: List<EntityDataField>) = writer.writeEntityMetadata(value)
+}
+
 class OptionalDelegate<T>(
     val elementDelegate: BaseDelegate<T>,
     val isPresent: () -> Boolean,
@@ -246,31 +264,7 @@ abstract class Packet {
     fun id() = delegate(IdentifierDelegate())
     fun position() = delegate(PositionDelegate())
     fun angle() = delegate(AngleDelegate())
-    /*
-    fun writeEntityMetadata(value: Any) // TODO
-    fun writeSlot(value: Any)// TODO
-    fun writeNBTTag(value: Any) // TODO
-    fun writeAngle(value: Any) // TODO
-    fun writeUUID(value: Any) // TODO
-    fun writeXEnum(value: Any) // TODO
-    */
+    fun nbtTag() = delegate(NbtTagDelegate())
+    fun slot() = delegate(SlotDelegate())
+    fun entityMetadata() = delegate(EntityMetadataDelegate())
 }
-
-/*
-class ChunkData : Packet() {
-    var x by int()
-    var b by bool()
-    var z by int().onlyIf(::b)
-    var fullChunk by bool()
-    var primaryBitMask by varInt()
-    var heightMaps by nbt()
-    var biomeLength by varInt().onlyIf { fullChunk }
-    var biomes by varInt().array { biomeLength }.onlyIf { fullChunk }
-    var size by varInt()
-    var data by byteArray { size }
-    var blockEntitiyCount by varInt()
-    var block Entities by nbt().array(
-    { blockEntityCount },
-    { blockEntityCount = value })
-}
-*/

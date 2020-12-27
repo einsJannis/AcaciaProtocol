@@ -1,6 +1,9 @@
 package dev.einsjannis.acacia.protocol
 
 import dev.einsjannis.acacia.protocol.chat.ChatComponent
+import dev.einsjannis.acacia.protocol.entity.EntityDataField
+import dev.einsjannis.acacia.protocol.nbt.NbtTag
+import dev.einsjannis.acacia.protocol.nbt.SlotData
 
 interface PrimitiveWriter {
     fun writeBoolean(value: Boolean)
@@ -14,14 +17,13 @@ interface PrimitiveWriter {
     fun writeDouble(value: Double)
     fun writeString(value: String)
     fun writeChat(value: ChatComponent)
-    fun writeIdentifier(value: Identifier) // TODO
+    fun writeIdentifier(value: Identifier)
     fun writeVarInt(value: Int)
     fun writeVarLong(value: Long)
-    fun writeEntityMetadata(value: Any) // TODO
-    fun writeSlot(value: Any)// TODO
-    fun writeNBTTag(value: Any) // TODO
+    fun writeEntityMetadata(value: List<EntityDataField>)
+    fun writeSlot(value: SlotData)
+    fun writeNBTTag(value: NbtTag)
     fun writePosition(value: Position)
-    fun writeUUID(value: UUID) // TODO
-    fun writeXEnum(value: Any) // TODO
+    fun writeUUID(value: UUID)
     fun writeByteArray(value: ByteArray)
 }
