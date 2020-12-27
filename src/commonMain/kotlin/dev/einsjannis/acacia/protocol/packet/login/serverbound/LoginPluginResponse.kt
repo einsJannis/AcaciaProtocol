@@ -8,6 +8,6 @@ import dev.einsjannis.acacia.protocol.PacketMeta
 class LoginPluginResponse : Packet() {
     var messageId by id()
     var successful by bool()
-    val data: ByteArray get() = TODO()
+    val data by byteArray({ it }, {})
     companion object : PacketMeta<LoginPluginResponse>(0x02, ConnectionState.LOGIN, Bound.SERVER, ::LoginPluginResponse)
 }

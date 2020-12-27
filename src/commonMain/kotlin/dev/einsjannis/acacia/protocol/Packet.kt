@@ -32,9 +32,9 @@ abstract class BaseDelegate<T> : ReadWriteProperty<Packet, T> {
         OptionalDelegate(this, isPresent, setPresent)
 
     fun array(sizeProp: KMutableProperty0<Int>) =
-        ArrayDelegate(this, sizeProp::get, sizeProp::set)
+        ArrayDelegate(this, { sizeProp.get() }, sizeProp::set)
 
-    fun array(getSize: () -> Int, setSize: (Int) -> Unit) =
+    fun array(getSize: (remainingBytes: Int) -> Int, setSize: (Int) -> Unit) =
         ArrayDelegate(this, getSize, setSize)
 
     fun <V> mapped(from: (T) -> V, to: (V) -> T) = MappedDelegate<V, T>(this, from, to)
@@ -104,12 +104,12 @@ class VarLongDelegate : BaseDelegate<Long>() {
     override fun write(writer: PrimitiveWriter, value: Long) = writer.writeVarLong(value)
 }
 
-class ByteArrayDelegate(val getSize: () -> Int, val setSize: (Int) -> Unit) : BaseDelegate<ByteArray>() {
+class ByteArrayDelegate(val getSize: (remainingBytes: Int) -> Int, val setSize: (Int) -> Unit) : BaseDelegate<ByteArray>() {
     override fun setValue(thisRef: Packet, property: KProperty<*>, value: ByteArray) {
         super.setValue(thisRef, property, value)
         setSize(value.size)
     }
-    override fun read(reader: PrimitiveReader): ByteArray = reader.readByteArray(getSize())
+    override fun read(reader: PrimitiveReader): ByteArray = reader.readByteArray(getSize(reader.remainingBytes))
     override fun write(writer: PrimitiveWriter, value: ByteArray) = writer.writeByteArray(value)
 }
 
@@ -152,14 +152,14 @@ class OptionalDelegate<T>(
         value?.let { elementDelegate.write(writer, it) } ?: Unit
 }
 
-class ArrayDelegate<T>(val elementDelegate: BaseDelegate<T>, val getSize: () -> Int, val setSize: (Int) -> Unit) :
+class ArrayDelegate<T>(val elementDelegate: BaseDelegate<T>, val getSize: (remainingBytes: Int) -> Int, val setSize: (Int) -> Unit) :
     BaseDelegate<List<T>>() {
     override fun setValue(thisRef: Packet, property: KProperty<*>, value: List<T>) {
         super.setValue(thisRef, property, value)
         setSize(value.size)
     }
 
-    override fun read(reader: PrimitiveReader): List<T> = (0 until getSize()).map { elementDelegate.read(reader) }
+    override fun read(reader: PrimitiveReader): List<T> = (0 until getSize(reader.remainingBytes)).map { elementDelegate.read(reader) }
     override fun write(writer: PrimitiveWriter, value: List<T>) =
         value.forEach { elementDelegate.write(writer, it) }
 }
@@ -238,8 +238,8 @@ abstract class Packet {
     fun varInt() = delegate(VarIntDelegate())
     fun varLong() = delegate(VarLongDelegate())
     fun byteArray(sizeProp: KMutableProperty0<Int>) =
-        delegate(ByteArrayDelegate(sizeProp::get, sizeProp::set))
-    fun byteArray(getSize: () -> Int, setSize: (Int) -> Unit) =
+        delegate(ByteArrayDelegate({ sizeProp.get() }, sizeProp::set))
+    fun byteArray(getSize: (remainingBytes: Int) -> Int, setSize: (Int) -> Unit) =
         delegate(ByteArrayDelegate(getSize, setSize))
     fun uuid() = delegate(UUIDDelegate())
     fun chat() = delegate(ChatDelegate())
