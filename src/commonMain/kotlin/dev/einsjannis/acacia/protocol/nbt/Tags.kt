@@ -17,13 +17,13 @@ enum class NbtTypeId(val id: Int) {
 }
 
 sealed class NbtTag(val type: NbtTypeId)
-data class ByteTag(val value: Byte) : NbtTag(NbtTypeId.BYTE)
-data class ShortTag(val value: Short) : NbtTag(NbtTypeId.SHORT)
-data class IntTag(val value: Int) : NbtTag(NbtTypeId.INT)
-data class LongTag(val value: Long) : NbtTag(NbtTypeId.LONG)
-data class FloatTag(val value: Float) : NbtTag(NbtTypeId.FLOAT)
-data class DoubleTag(val value: Double) : NbtTag(NbtTypeId.DOUBLE)
-data class ByteArrayTag(val value: ByteArray) : NbtTag(NbtTypeId.BYTE_ARRAY) {
+data class ByteTag(var value: Byte) : NbtTag(NbtTypeId.BYTE)
+data class ShortTag(var value: Short) : NbtTag(NbtTypeId.SHORT)
+data class IntTag(var value: Int) : NbtTag(NbtTypeId.INT)
+data class LongTag(var value: Long) : NbtTag(NbtTypeId.LONG)
+data class FloatTag(var value: Float) : NbtTag(NbtTypeId.FLOAT)
+data class DoubleTag(var value: Double) : NbtTag(NbtTypeId.DOUBLE)
+data class ByteArrayTag(var value: ByteArray) : NbtTag(NbtTypeId.BYTE_ARRAY) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -40,10 +40,10 @@ data class ByteArrayTag(val value: ByteArray) : NbtTag(NbtTypeId.BYTE_ARRAY) {
     }
 }
 
-data class StringTag(val value: String) : NbtTag(NbtTypeId.STRING)
-data class ListTag(val typeId: NbtTypeId, val values: List<NbtTag>) : NbtTag(NbtTypeId.LIST)
-data class CompoundTag(val map: Map<String, NbtTag>) : NbtTag(NbtTypeId.COMPOUND)
-data class IntArrayTag(val value: IntArray) : NbtTag(NbtTypeId.INT_ARRAY) {
+data class StringTag(var value: String) : NbtTag(NbtTypeId.STRING)
+data class ListTag(var typeId: NbtTypeId, var values: List<NbtTag>) : NbtTag(NbtTypeId.LIST)
+data class CompoundTag(var map: Map<String, NbtTag>) : NbtTag(NbtTypeId.COMPOUND)
+data class IntArrayTag(var value: IntArray) : NbtTag(NbtTypeId.INT_ARRAY) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -60,7 +60,7 @@ data class IntArrayTag(val value: IntArray) : NbtTag(NbtTypeId.INT_ARRAY) {
     }
 }
 
-data class LongArrayTag(val value: LongArray) : NbtTag(NbtTypeId.LONG_ARRAY) {
+data class LongArrayTag(var value: LongArray) : NbtTag(NbtTypeId.LONG_ARRAY) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
