@@ -2,17 +2,18 @@ package dev.einsjannis.acacia.protocol
 
 import dev.einsjannis.acacia.protocol.chat.ChatComponent
 import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.*
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KProperty
 
 abstract class BaseDelegate<T> : ReadWriteProperty<Packet, T> {
 
     private var _value: T? = null
 
-    fun readValue(reader: PrimitiveReader) {
+    open fun readValue(reader: PrimitiveReader) {
         _value = read(reader)
     }
 
-    fun writeValue(writer: PrimitiveWriter) {
+    open fun writeValue(writer: PrimitiveWriter) {
         _value?.let { write(writer, it) }
     }
 
@@ -35,6 +36,8 @@ abstract class BaseDelegate<T> : ReadWriteProperty<Packet, T> {
 
     fun array(getSize: () -> Int, setSize: (Int) -> Unit) =
         ArrayDelegate(this, getSize, setSize)
+
+    fun <V> mapped(from: (T) -> V, to: (V) -> T) = MappedDelegate<V, T>(this, from, to)
 
     abstract fun write(writer: PrimitiveWriter, value: T)
     abstract fun read(reader: PrimitiveReader): T
@@ -150,9 +153,36 @@ class ArrayDelegate<T>(val elementDelegate: BaseDelegate<T>, val getSize: () -> 
         super.setValue(thisRef, property, value)
         setSize(value.size)
     }
+
     override fun read(reader: PrimitiveReader): List<T> = (0 until getSize()).map { elementDelegate.read(reader) }
     override fun write(writer: PrimitiveWriter, value: List<T>) =
         value.forEach { elementDelegate.write(writer, it) }
+}
+
+class MappedDelegate<T, V>(val wrappedDelegate: BaseDelegate<V>, val from: (V) -> T, val to: (T) -> V) :
+    BaseDelegate<T>() {
+    override fun setValue(thisRef: Packet, property: KProperty<*>, value: T) {
+        wrappedDelegate.setValue(thisRef, property, to(value))
+    }
+
+    override fun getValue(thisRef: Packet, property: KProperty<*>): T =
+        from(wrappedDelegate.getValue(thisRef, property))
+
+    override fun readValue(reader: PrimitiveReader) {
+        wrappedDelegate.readValue(reader)
+    }
+
+    override fun writeValue(writer: PrimitiveWriter) {
+        wrappedDelegate.writeValue(writer)
+    }
+
+    override fun write(writer: PrimitiveWriter, value: T) {
+        throw UnsupportedOperationException()
+    }
+
+    override fun read(reader: PrimitiveReader): T {
+        throw UnsupportedOperationException()
+    }
 }
 
 enum class ConnectionState {
