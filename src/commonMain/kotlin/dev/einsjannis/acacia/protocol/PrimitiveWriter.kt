@@ -1,5 +1,7 @@
 package dev.einsjannis.acacia.protocol
 
+import dev.einsjannis.acacia.protocol.chat.ChatComponent
+
 interface PrimitiveWriter {
     fun writeBoolean(value: Boolean)
     fun writeByte(value: Byte)
@@ -11,7 +13,7 @@ interface PrimitiveWriter {
     fun writeFloat(value: Float)
     fun writeDouble(value: Double)
     fun writeString(value: String)
-    fun writeChat(value: Any) // TODO
+    fun writeChat(value: ChatComponent)
     fun writeIdentifier(value: Any) // TODO
     fun writeVarInt(value: Int)
     fun writeVarLong(value: Long)

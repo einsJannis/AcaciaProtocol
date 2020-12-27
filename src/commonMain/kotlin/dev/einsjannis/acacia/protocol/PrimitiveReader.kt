@@ -1,5 +1,7 @@
 package dev.einsjannis.acacia.protocol
 
+import dev.einsjannis.acacia.protocol.chat.ChatComponent
+
 interface PrimitiveReader {
     fun readBoolean(): Boolean
     fun readByte(): Byte
@@ -11,7 +13,7 @@ interface PrimitiveReader {
     fun readFloat(): Float
     fun readDouble(): Double
     fun readString(): String
-    fun readChat(): Any // TODO
+    fun readChat(): ChatComponent
     fun readIdentifier(): Any // TODO
     fun readVarInt(): Int
     fun readVarLong(): Long

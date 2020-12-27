@@ -1,5 +1,6 @@
 package dev.einsjannis.acacia.protocol
 
+import dev.einsjannis.acacia.protocol.chat.ChatComponent
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.*
 
@@ -112,6 +113,11 @@ class ByteArrayDelegate(val getSize: () -> Int, val setSize: (Int) -> Unit) : Ba
 class UUIDDelegate : BaseDelegate<UUID>() {
     override fun read(reader: PrimitiveReader): UUID = reader.readUUID()
     override fun write(writer: PrimitiveWriter, value: UUID) = writer.writeUUID(value)
+}
+
+class ChatDelegate : BaseDelegate<ChatComponent>() {
+    override fun read(reader: PrimitiveReader): ChatComponent = reader.readChat()
+    override fun write(writer: PrimitiveWriter, value: ChatComponent) = writer.writeChat(value)
 }
 
 class OptionalDelegate<T>(
