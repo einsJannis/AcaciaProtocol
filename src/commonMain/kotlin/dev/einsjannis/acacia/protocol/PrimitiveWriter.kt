@@ -1,4 +1,4 @@
-package dev.einsjannis.acacia.protocol.internal
+package dev.einsjannis.acacia.protocol
 
 interface PrimitiveWriter {
     fun writeBoolean(value: Boolean)
@@ -20,9 +20,7 @@ interface PrimitiveWriter {
     fun writeNBTTag(value: Any) // TODO
     fun writePosition(value: Any) // TODO
     fun writeAngle(value: Any) // TODO
-    fun writeUUID(value: Any) // TODO
-    fun writeOptionalX(size: Int)
-    fun beginArray(count: Int, size: Int)
+    fun writeUUID(value: UUID) // TODO
     fun writeXEnum(value: Any) // TODO
     fun writeByteArray(value: ByteArray)
 }
