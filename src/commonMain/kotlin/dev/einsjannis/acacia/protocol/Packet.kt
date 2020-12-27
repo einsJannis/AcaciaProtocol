@@ -120,6 +120,11 @@ class ChatDelegate : BaseDelegate<ChatComponent>() {
     override fun write(writer: PrimitiveWriter, value: ChatComponent) = writer.writeChat(value)
 }
 
+class IdentifierDelegate : BaseDelegate<Identifier>() {
+    override fun read(reader: PrimitiveReader): Identifier = reader.readIdentifier()
+    override fun write(writer: PrimitiveWriter, value: Identifier) = writer.writeIdentifier(value)
+}
+
 class OptionalDelegate<T>(
     val elementDelegate: BaseDelegate<T>,
     val isPresent: () -> Boolean,
@@ -192,9 +197,9 @@ abstract class Packet {
     fun byteArray(getSize: () -> Int, setSize: (Int) -> Unit) =
         delegate(ByteArrayDelegate(getSize, setSize))
     fun uuid() = delegate(UUIDDelegate())
+    fun chat() = delegate(ChatDelegate())
+    fun id() = delegate(IdentifierDelegate())
     /*
-    fun writeChat(value: Any) // TODO
-    fun writeIdentifier(value: Any) // TODO
     fun writeEntityMetadata(value: Any) // TODO
     fun writeSlot(value: Any)// TODO
     fun writeNBTTag(value: Any) // TODO

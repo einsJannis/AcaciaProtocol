@@ -1,5 +1,5 @@
 package dev.einsjannis.acacia.protocol
 
-class Identifier {
-
+data class Identifier(var namespace: String, var name: String) {
+    override fun toString(): String = "$namespace:$name"
 }

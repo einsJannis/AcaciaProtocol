@@ -14,7 +14,7 @@ interface PrimitiveWriter {
     fun writeDouble(value: Double)
     fun writeString(value: String)
     fun writeChat(value: ChatComponent)
-    fun writeIdentifier(value: Any) // TODO
+    fun writeIdentifier(value: Identifier) // TODO
     fun writeVarInt(value: Int)
     fun writeVarLong(value: Long)
     fun writeEntityMetadata(value: Any) // TODO

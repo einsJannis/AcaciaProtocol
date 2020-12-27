@@ -14,7 +14,7 @@ interface PrimitiveReader {
     fun readDouble(): Double
     fun readString(): String
     fun readChat(): ChatComponent
-    fun readIdentifier(): Any // TODO
+    fun readIdentifier(): Identifier
     fun readVarInt(): Int
     fun readVarLong(): Long
     fun readEntityMetadata(): Any // TODO
