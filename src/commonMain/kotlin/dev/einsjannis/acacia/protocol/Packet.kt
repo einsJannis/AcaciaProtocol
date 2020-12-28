@@ -8,7 +8,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
-abstract class BaseDelegate<T> : ReadWriteProperty<Packet, T> {
+abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
 
     private var _value: T? = null
 
@@ -20,11 +20,11 @@ abstract class BaseDelegate<T> : ReadWriteProperty<Packet, T> {
         _value?.let { write(writer, it) }
     }
 
-    override fun setValue(thisRef: Packet, property: KProperty<*>, value: T) {
+    override fun setValue(thisRef: PacketObject, property: KProperty<*>, value: T) {
         _value = value
     }
 
-    override fun getValue(thisRef: Packet, property: KProperty<*>): T {
+    override fun getValue(thisRef: PacketObject, property: KProperty<*>): T {
         return _value!!
     }
 
@@ -108,7 +108,7 @@ class VarLongDelegate : BaseDelegate<Long>() {
 }
 
 class ByteArrayDelegate(val getSize: (remainingBytes: Int) -> Int, val setSize: (Int) -> Unit) : BaseDelegate<ByteArray>() {
-    override fun setValue(thisRef: Packet, property: KProperty<*>, value: ByteArray) {
+    override fun setValue(thisRef: PacketObject, property: KProperty<*>, value: ByteArray) {
         super.setValue(thisRef, property, value)
         setSize(value.size)
     }
@@ -161,7 +161,7 @@ class OptionalDelegate<T>(
     val isPresent: () -> Boolean,
     val setPresent: (Boolean) -> Unit
 ) : BaseDelegate<T?>() {
-    override fun setValue(thisRef: Packet, property: KProperty<*>, value: T?) {
+    override fun setValue(thisRef: PacketObject, property: KProperty<*>, value: T?) {
         super.setValue(thisRef, property, value)
         setPresent(value != null)
     }
@@ -172,7 +172,7 @@ class OptionalDelegate<T>(
 
 class ArrayDelegate<T>(val elementDelegate: BaseDelegate<T>, val getSize: (remainingBytes: Int) -> Int, val setSize: (Int) -> Unit) :
     BaseDelegate<List<T>>() {
-    override fun setValue(thisRef: Packet, property: KProperty<*>, value: List<T>) {
+    override fun setValue(thisRef: PacketObject, property: KProperty<*>, value: List<T>) {
         super.setValue(thisRef, property, value)
         setSize(value.size)
     }
@@ -184,11 +184,11 @@ class ArrayDelegate<T>(val elementDelegate: BaseDelegate<T>, val getSize: (remai
 
 class MappedDelegate<T, V>(val wrappedDelegate: BaseDelegate<V>, val from: (V) -> T, val to: (T) -> V) :
     BaseDelegate<T>() {
-    override fun setValue(thisRef: Packet, property: KProperty<*>, value: T) {
+    override fun setValue(thisRef: PacketObject, property: KProperty<*>, value: T) {
         wrappedDelegate.setValue(thisRef, property, to(value))
     }
 
-    override fun getValue(thisRef: Packet, property: KProperty<*>): T =
+    override fun getValue(thisRef: PacketObject, property: KProperty<*>): T =
         from(wrappedDelegate.getValue(thisRef, property))
 
     override fun readValue(reader: PrimitiveReader) {
@@ -206,6 +206,12 @@ class MappedDelegate<T, V>(val wrappedDelegate: BaseDelegate<V>, val from: (V) -
     override fun read(reader: PrimitiveReader): T {
         throw UnsupportedOperationException()
     }
+}
+
+class ObjectDelegate<T : PacketObject>(val packetObjectConstructor: () -> T) : BaseDelegate<T>() {
+    override fun read(reader: PrimitiveReader): T = packetObjectConstructor()
+        .also { it.delegates.forEach { it.readValue(reader) } }
+    override fun write(writer: PrimitiveWriter, value: T) = value.delegates.forEach { it.writeValue(writer) }
 }
 
 enum class Bound {
@@ -234,7 +240,9 @@ abstract class PacketMeta<T : Packet>(val id: Int, val connectionState: Connecti
 
 }
 
-abstract class Packet {
+abstract class Packet : PacketObject()
+
+abstract class PacketObject {
 
     internal val delegates = mutableListOf<BaseDelegate<*>>()
 
@@ -267,4 +275,6 @@ abstract class Packet {
     fun nbtTag() = delegate(NbtTagDelegate())
     fun slot() = delegate(SlotDelegate())
     fun entityMetadata() = delegate(EntityMetadataDelegate())
+    fun <T : PacketObject> `object`(objectConstructor: () -> T) =
+        delegate(ObjectDelegate(objectConstructor))
 }
