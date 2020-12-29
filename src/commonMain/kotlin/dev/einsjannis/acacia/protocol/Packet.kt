@@ -17,6 +17,7 @@ abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
     }
 
     open fun writeValue(writer: PrimitiveWriter) {
+        // TODO: warning or exception here?
         _value?.let { write(writer, it) }
     }
 
@@ -213,9 +214,13 @@ class MappedDelegate<T, V>(val wrappedDelegate: BaseDelegate<V>, val from: (V) -
     }
 }
 
+inline fun <reified T : Enum<T>> BaseDelegate<Int>.enumOrdinalMapping() =
+    mapped({ enumValues<T>()[it] }, { it.ordinal })
+
 class ObjectDelegate<T : PacketObject>(val packetObjectConstructor: () -> T) : BaseDelegate<T>() {
     override fun read(reader: PrimitiveReader): T = packetObjectConstructor()
         .also { it.delegates.forEach { it.readValue(reader) } }
+
     override fun write(writer: PrimitiveWriter, value: T) = value.delegates.forEach { it.writeValue(writer) }
 }
 
