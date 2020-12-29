@@ -40,7 +40,12 @@ abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
     fun array(getSize: (remainingBytes: Int) -> Int, setSize: (Int) -> Unit) =
         ArrayDelegate(this, getSize, setSize)
 
-    fun <V> mapped(from: (T) -> V, to: (V) -> T) = MappedDelegate<V, T>(this, from, to)
+    fun <V> mapped(from: (T) -> V, to: (V) -> T): MappedDelegate<V, T> = MappedDelegate(this, from, to)
+    fun <V> mapped(fromMap: Map<T, V>, toMap: Map<V, T>): MappedDelegate<V, T> =
+        mapped({ fromMap[it]!! }, { toMap[it]!! })
+
+    fun <V> mapped(values: Map<T, V>): MappedDelegate<V, T> = mapped(values, values.map { (k, v) -> v to k }.toMap())
+
 
     abstract fun write(writer: PrimitiveWriter, value: T)
     abstract fun read(reader: PrimitiveReader): T
