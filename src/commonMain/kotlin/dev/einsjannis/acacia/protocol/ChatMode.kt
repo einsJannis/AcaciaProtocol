@@ -1,4 +1,4 @@
-package dev.einsjannis.acacia.protocol.packet.play
+package dev.einsjannis.acacia.protocol
 
 enum class ChatMode {
     ENABLED,

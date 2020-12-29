@@ -4,7 +4,7 @@ import dev.einsjannis.acacia.protocol.Bound
 import dev.einsjannis.acacia.protocol.ConnectionState
 import dev.einsjannis.acacia.protocol.Packet
 import dev.einsjannis.acacia.protocol.PacketMeta
-import dev.einsjannis.acacia.protocol.packet.play.StatusAction
+import dev.einsjannis.acacia.protocol.StatusAction
 
 class ClientStatus : Packet() {
     var actionId by varInt().mapped({ StatusAction.values()[it] }, { it.ordinal })

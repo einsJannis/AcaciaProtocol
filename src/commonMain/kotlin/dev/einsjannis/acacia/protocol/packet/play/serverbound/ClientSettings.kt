@@ -5,8 +5,8 @@ import dev.einsjannis.acacia.protocol.ConnectionState
 import dev.einsjannis.acacia.protocol.Packet
 import dev.einsjannis.acacia.protocol.PacketMeta
 import dev.einsjannis.acacia.protocol.SkinPart
-import dev.einsjannis.acacia.protocol.packet.play.ChatMode
-import dev.einsjannis.acacia.protocol.packet.play.MainHand
+import dev.einsjannis.acacia.protocol.ChatMode
+import dev.einsjannis.acacia.protocol.MainHand
 
 class ClientSettings : Packet() {
     var locale by string()
