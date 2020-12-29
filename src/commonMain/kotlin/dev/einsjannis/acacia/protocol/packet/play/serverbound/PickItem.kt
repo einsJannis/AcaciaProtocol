@@ -6,7 +6,7 @@ import dev.einsjannis.acacia.protocol.Packet
 import dev.einsjannis.acacia.protocol.PacketMeta
 
 class PickItem : Packet() {
-    var slötToUse by varInt()
+    var slotToUse by varInt()
 
     companion object : PacketMeta<PickItem>(0x18, ConnectionState.PLAY, Bound.SERVER, ::PickItem)
 }
