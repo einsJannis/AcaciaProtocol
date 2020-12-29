@@ -1,0 +1,11 @@
+package dev.einsjannis.acacia.protocol.packet.play.clientbound
+
+import dev.einsjannis.acacia.protocol.Bound
+import dev.einsjannis.acacia.protocol.ConnectionState
+import dev.einsjannis.acacia.protocol.Packet
+import dev.einsjannis.acacia.protocol.PacketMeta
+
+class OpenBook : Packet() {
+    var hand by varInt()
+    companion object : PacketMeta<OpenBook>(0x2C, ConnectionState.PLAY, Bound.CLIENT, ::OpenBook)
+}
