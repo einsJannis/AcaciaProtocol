@@ -32,7 +32,7 @@ abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
     fun onlyIf(boolProperty: KMutableProperty0<Boolean>) =
         OptionalDelegate(this, boolProperty::get, boolProperty::set)
 
-    fun onlyIf(isPresent: () -> Boolean, setPresent: (Boolean) -> Unit) =
+    fun onlyIf(isPresent: () -> Boolean, setPresent: (Boolean) -> Unit = {}) =
         OptionalDelegate(this, isPresent, setPresent)
 
     fun array(sizeProp: KMutableProperty0<Int>) =
@@ -217,6 +217,7 @@ class MappedDelegate<T, V>(val wrappedDelegate: BaseDelegate<V>, val from: (V) -
 inline fun <reified T : Enum<T>> BaseDelegate<Int>.enumOrdinalMapping() =
     mapped({ enumValues<T>()[it] }, { it.ordinal })
 
+fun <T : Flags> BaseDelegate<Int>.bitFlag(con: (Int) -> T) = mapped<T>(con, { it.value })
 class ObjectDelegate<T : PacketObject>(val packetObjectConstructor: () -> T) : BaseDelegate<T>() {
     override fun read(reader: PrimitiveReader): T = packetObjectConstructor()
         .also { it.delegates.forEach { it.readValue(reader) } }

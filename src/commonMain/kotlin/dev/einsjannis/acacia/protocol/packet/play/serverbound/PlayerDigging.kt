@@ -18,7 +18,7 @@ class PlayerDigging : Packet() {
     var face by byte().mapped(faceMapping)
 
     companion object {
-        private val faceMapping = mapOf(
+        val faceMapping = mapOf(
             0.toByte() to Facing.DOWN,
             1.toByte() to Facing.UP,
             2.toByte() to Facing.NORTH,
