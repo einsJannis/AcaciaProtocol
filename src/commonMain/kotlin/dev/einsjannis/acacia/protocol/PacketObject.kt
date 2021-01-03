@@ -5,7 +5,7 @@ import kotlin.reflect.KMutableProperty0
 
 abstract class PacketObject {
 
-    internal val delegate: List<BaseDelegate<*>>
+    val delegates: List<BaseDelegate<*>>
         get() = _delegates.map {
             var temp = it
             while (temp.child != null) {

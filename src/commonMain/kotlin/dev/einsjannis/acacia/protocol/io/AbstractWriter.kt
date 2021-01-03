@@ -6,7 +6,7 @@ import dev.einsjannis.acacia.protocol.primitives.chat.ChatComponent
 import dev.einsjannis.acacia.protocol.primitives.chat.ChatSerializer
 import dev.einsjannis.acacia.protocol.primitives.nbt.*
 import dev.einsjannis.acacia.protocol.types.Position
-import dev.einsjannis.acacia.protocol.types.entity.*
+import dev.einsjannis.acacia.protocol.types.entity.EntityDataField
 import kotlin.experimental.or
 
 abstract class AbstractWriter : PrimitiveWriter {
@@ -19,7 +19,7 @@ abstract class AbstractWriter : PrimitiveWriter {
 
     override fun writeShort(value: Short) = writeByteArray(
         byteArrayOf(
-            (value.toInt() shr 8).toByte(),
+            (value.toInt() ushr 8).toByte(),
             value.toByte()
         )
     )
@@ -28,22 +28,22 @@ abstract class AbstractWriter : PrimitiveWriter {
 
     override fun writeInt(value: Int) = writeByteArray(
         byteArrayOf(
-            (value shr 24).toByte(),
-            (value shr 16).toByte(),
-            (value shr 8).toByte(),
+            (value ushr 24).toByte(),
+            (value ushr 16).toByte(),
+            (value ushr 8).toByte(),
             value.toByte()
         )
     )
 
     override fun writeLong(value: Long) = writeByteArray(
         byteArrayOf(
-            (value shr 56).toByte(),
-            (value shr 48).toByte(),
-            (value shr 40).toByte(),
-            (value shr 32).toByte(),
-            (value shr 24).toByte(),
-            (value shr 16).toByte(),
-            (value shr 8).toByte(),
+            (value ushr 56).toByte(),
+            (value ushr 48).toByte(),
+            (value ushr 40).toByte(),
+            (value ushr 32).toByte(),
+            (value ushr 24).toByte(),
+            (value ushr 16).toByte(),
+            (value ushr 8).toByte(),
             value.toByte()
         )
     )
@@ -99,15 +99,17 @@ abstract class AbstractWriter : PrimitiveWriter {
             is FilledSlot -> {
                 writeVarInt(value.itemId)
                 writeByte(value.itemCount)
-                if (value.nbt != null)
-                    writeNBTTag(value.nbt!!)
-                else writeByte(0)
+                writeNBTTag(value.nbt ?: ENDTag)
             }
         }
     }
 
     override fun writeNBTTag(value: NbtTag) {
         writeByte(value.type.id)
+        writeNBTTagRaw(value)
+    }
+
+    private fun writeNBTTagRaw(value: NbtTag) {
         when (value) {
             is ByteTag -> writeByte(value.value)
             is ShortTag -> writeShort(value.value)
@@ -127,14 +129,15 @@ abstract class AbstractWriter : PrimitiveWriter {
             is ListTag -> {
                 writeByte(value.typeId.id)
                 writeInt(value.values.size)
-                value.values.forEach { writeNBTTag(it) }
+                value.values.forEach { writeNBTTagRaw(it) }
             }
             is CompoundTag -> {
                 value.map.forEach { (key, entry) ->
+                    writeByte(entry.type.id)
                     val array = key.encodeToByteArray()
                     writeUnsignedShort(array.size.toUShort())
                     writeByteArray(array)
-                    writeNBTTag(entry)
+                    writeNBTTagRaw(entry)
                 }
                 writeByte(0)
             }
@@ -145,6 +148,8 @@ abstract class AbstractWriter : PrimitiveWriter {
             is LongArrayTag -> {
                 writeInt(value.value.size)
                 value.value.forEach { writeLong(it) }
+            }
+            is ENDTag -> {
             }
         }
     }

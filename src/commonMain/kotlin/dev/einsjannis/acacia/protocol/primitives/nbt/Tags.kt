@@ -77,3 +77,5 @@ data class LongArrayTag(var value: LongArray) : NbtTag(NbtTypeId.LONG_ARRAY) {
     }
 }
 
+object ENDTag : NbtTag(NbtTypeId.END)
+
