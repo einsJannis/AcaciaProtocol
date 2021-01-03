@@ -1,6 +1,7 @@
 package dev.einsjannis.acacia.protocol.packet.play.clientbound
 
 import dev.einsjannis.acacia.protocol.*
+import dev.einsjannis.acacia.protocol.primitives.Flags
 
 class StopSound : Packet() {
     var flags by byte().mapped({ Flags(it.toInt()) }, { it.value.toByte() })

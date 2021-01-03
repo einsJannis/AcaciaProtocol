@@ -1,6 +1,7 @@
 package dev.einsjannis.acacia.protocol.packet.play.clientbound
 
 import dev.einsjannis.acacia.protocol.*
+import dev.einsjannis.acacia.protocol.types.SoundCategory
 
 class NamedSoundEffect : Packet() {
     var soundName by id()

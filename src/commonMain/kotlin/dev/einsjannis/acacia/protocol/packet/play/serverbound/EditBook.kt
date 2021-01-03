@@ -4,7 +4,7 @@ import dev.einsjannis.acacia.protocol.Bound
 import dev.einsjannis.acacia.protocol.ConnectionState
 import dev.einsjannis.acacia.protocol.Packet
 import dev.einsjannis.acacia.protocol.PacketMeta
-import dev.einsjannis.acacia.protocol.mappedAsHand
+import dev.einsjannis.acacia.protocol.types.mappedAsHand
 
 class EditBook : Packet() {
     var newBook = slot()

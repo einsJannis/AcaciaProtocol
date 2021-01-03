@@ -1,6 +1,7 @@
 package dev.einsjannis.acacia.protocol.packet.play.clientbound
 
 import dev.einsjannis.acacia.protocol.*
+import dev.einsjannis.acacia.protocol.types.Record
 
 class Explosion : Packet() {
     var x by float()

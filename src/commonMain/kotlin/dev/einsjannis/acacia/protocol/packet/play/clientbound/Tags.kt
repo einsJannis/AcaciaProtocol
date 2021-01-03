@@ -1,7 +1,7 @@
 package dev.einsjannis.acacia.protocol.packet.play.clientbound
 
 import dev.einsjannis.acacia.protocol.Packet
-import dev.einsjannis.acacia.protocol.Tag
+import dev.einsjannis.acacia.protocol.types.Tag
 
 class Tags : Packet() {
     var blockTagsSize by varInt()

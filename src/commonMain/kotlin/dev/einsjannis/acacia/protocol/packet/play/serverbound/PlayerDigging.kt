@@ -1,6 +1,6 @@
 package dev.einsjannis.acacia.protocol.packet.play.serverbound
 
-import dev.einsjannis.acacia.protocol.Facing
+import dev.einsjannis.acacia.protocol.types.Facing
 import dev.einsjannis.acacia.protocol.Packet
 
 enum class DigStatus {

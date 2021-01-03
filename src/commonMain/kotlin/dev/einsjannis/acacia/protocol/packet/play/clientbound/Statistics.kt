@@ -1,7 +1,7 @@
 package dev.einsjannis.acacia.protocol.packet.play.clientbound
 
 import dev.einsjannis.acacia.protocol.*
-import dev.einsjannis.acacia.protocol.statistic.Statistic
+import dev.einsjannis.acacia.protocol.types.statistic.Statistic
 
 class Statistics : Packet() {
     var count by varInt()

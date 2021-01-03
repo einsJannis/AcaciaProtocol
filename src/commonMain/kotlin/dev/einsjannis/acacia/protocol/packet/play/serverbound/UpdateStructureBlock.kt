@@ -2,8 +2,8 @@ package dev.einsjannis.acacia.protocol.packet.play.serverbound
 
 import dev.einsjannis.acacia.protocol.Bound
 import dev.einsjannis.acacia.protocol.ConnectionState
-import dev.einsjannis.acacia.protocol.FlagBit
-import dev.einsjannis.acacia.protocol.Flags
+import dev.einsjannis.acacia.protocol.primitives.FlagBit
+import dev.einsjannis.acacia.protocol.primitives.Flags
 import dev.einsjannis.acacia.protocol.Packet
 import dev.einsjannis.acacia.protocol.PacketMeta
 import dev.einsjannis.acacia.protocol.bitFlag
