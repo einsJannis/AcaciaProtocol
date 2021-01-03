@@ -8,7 +8,14 @@ import kotlin.reflect.KProperty
 
 abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
 
+    internal var child: BaseDelegate<*>? = null
+
     private var _value: T? = null
+
+    private fun <V, C : BaseDelegate<V>> child(child: C): C {
+        this.child = child
+        return child
+    }
 
     open fun readValue(reader: PrimitiveReader) {
         _value = read(reader)
@@ -28,23 +35,24 @@ abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
     }
 
     fun onlyIf(boolProperty: KMutableProperty0<Boolean>) =
-        OptionalDelegate(this, boolProperty::get, boolProperty::set)
+        child(OptionalDelegate(this, boolProperty::get, boolProperty::set))
 
     fun onlyIf(isPresent: () -> Boolean, setPresent: (Boolean) -> Unit = {}) =
-        OptionalDelegate(this, isPresent, setPresent)
+        child(OptionalDelegate(this, isPresent, setPresent))
 
     fun array(sizeProp: KMutableProperty0<Int>) =
-        ArrayDelegate(this, { sizeProp.get() }, sizeProp::set)
+        child(ArrayDelegate(this, { sizeProp.get() }, sizeProp::set))
 
     fun array(getSize: (remainingBytes: Int) -> Int, setSize: (Int) -> Unit) =
-        ArrayDelegate(this, getSize, setSize)
+        child(ArrayDelegate(this, getSize, setSize))
 
-    fun <V> mapped(from: (T) -> V, to: (V) -> T): MappedDelegate<V, T> = MappedDelegate(this, from, to)
+    fun <V> mapped(from: (T) -> V, to: (V) -> T): MappedDelegate<V, T> =
+        child(MappedDelegate(this, from, to))
     fun <V> mapped(fromMap: Map<T, V>, toMap: Map<V, T>): MappedDelegate<V, T> =
         mapped({ fromMap[it]!! }, { toMap[it]!! })
 
-    fun <V> mapped(values: Map<T, V>): MappedDelegate<V, T> = mapped(values, values.map { (k, v) -> v to k }.toMap())
-
+    fun <V> mapped(values: Map<T, V>): MappedDelegate<V, T> =
+        mapped(values, values.map { (k, v) -> v to k }.toMap())
 
     abstract fun write(writer: PrimitiveWriter, value: T)
     abstract fun read(reader: PrimitiveReader): T

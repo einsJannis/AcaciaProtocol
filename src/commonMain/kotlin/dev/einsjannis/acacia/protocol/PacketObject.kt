@@ -5,37 +5,46 @@ import kotlin.reflect.KMutableProperty0
 
 abstract class PacketObject {
 
-    internal val delegates = mutableListOf<BaseDelegate<*>>()
+    internal val delegate: List<BaseDelegate<*>>
+        get() = _delegates.map {
+            var temp = it
+            while (temp.child != null) {
+                temp = temp.child!!
+            }
+            temp
+        }
+
+    private val _delegates = mutableListOf<BaseDelegate<*>>()
 
     private fun <T : BaseDelegate<E>, E> delegate(d: T): T {
-        delegates.add(d)
+        _delegates.add(d)
         return d
     }
 
-    fun bool() = delegate(BooleanDelegate())
-    fun byte() = delegate(ByteDelegate())
-    fun ubyte() = delegate(UByteDelegate())
-    fun short() = delegate(ShortDelegate())
-    fun ushort() = delegate(UShortDelegate())
-    fun int() = delegate(IntDelegate())
-    fun long() = delegate(LongDelegate())
-    fun float() = delegate(FloatDelegate())
-    fun double() = delegate(DoubleDelegate())
-    fun string() = delegate(StringDelegate())
-    fun varInt() = delegate(VarIntDelegate())
-    fun varLong() = delegate(VarLongDelegate())
-    fun byteArray(sizeProp: KMutableProperty0<Int>) =
+    protected fun bool() = delegate(BooleanDelegate())
+    protected fun byte() = delegate(ByteDelegate())
+    protected fun ubyte() = delegate(UByteDelegate())
+    protected fun short() = delegate(ShortDelegate())
+    protected fun ushort() = delegate(UShortDelegate())
+    protected fun int() = delegate(IntDelegate())
+    protected fun long() = delegate(LongDelegate())
+    protected fun float() = delegate(FloatDelegate())
+    protected fun double() = delegate(DoubleDelegate())
+    protected fun string() = delegate(StringDelegate())
+    protected fun varInt() = delegate(VarIntDelegate())
+    protected fun varLong() = delegate(VarLongDelegate())
+    protected fun byteArray(sizeProp: KMutableProperty0<Int>) =
         delegate(ByteArrayDelegate({ sizeProp.get() }, sizeProp::set))
-    fun byteArray(getSize: (remainingBytes: Int) -> Int, setSize: (Int) -> Unit) =
+    protected fun byteArray(getSize: (remainingBytes: Int) -> Int, setSize: (Int) -> Unit) =
         delegate(ByteArrayDelegate(getSize, setSize))
-    fun uuid() = delegate(UUIDDelegate())
-    fun chat() = delegate(ChatDelegate())
-    fun id() = delegate(IdentifierDelegate())
-    fun position() = delegate(PositionDelegate())
-    fun angle() = delegate(AngleDelegate())
-    fun nbtTag() = delegate(NbtTagDelegate())
-    fun slot() = delegate(SlotDelegate())
-    fun entityMetadata() = delegate(EntityMetadataDelegate())
-    fun <T : PacketObject> `object`(objectConstructor: () -> T) =
+    protected fun uuid() = delegate(UUIDDelegate())
+    protected fun chat() = delegate(ChatDelegate())
+    protected fun id() = delegate(IdentifierDelegate())
+    protected fun position() = delegate(PositionDelegate())
+    protected fun angle() = delegate(AngleDelegate())
+    protected fun nbtTag() = delegate(NbtTagDelegate())
+    protected fun slot() = delegate(SlotDelegate())
+    protected fun entityMetadata() = delegate(EntityMetadataDelegate())
+    protected fun <T : PacketObject> `object`(objectConstructor: () -> T) =
         delegate(ObjectDelegate(objectConstructor))
 }
