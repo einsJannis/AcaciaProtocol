@@ -1,6 +1,6 @@
 package dev.einsjannis.acacia.protocol.primitives.nbt
 
-enum class NbtTypeId(val id: Int) {
+enum class NbtTypeId(val id: Byte) {
     END(0),
     BYTE(1),
     SHORT(2),

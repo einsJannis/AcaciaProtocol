@@ -1,12 +1,10 @@
 package dev.einsjannis.acacia.protocol.types.entity
 
+import dev.einsjannis.acacia.protocol.PacketObject
+import dev.einsjannis.acacia.protocol.enumOrdinalMapping
+import dev.einsjannis.acacia.protocol.packet.play.clientbound.Particle
 import dev.einsjannis.acacia.protocol.types.Direction
 import dev.einsjannis.acacia.protocol.types.Pose
-import dev.einsjannis.acacia.protocol.types.Position
-import dev.einsjannis.acacia.protocol.primitives.UUID
-import dev.einsjannis.acacia.protocol.primitives.chat.ChatComponent
-import dev.einsjannis.acacia.protocol.primitives.nbt.NbtTag
-import dev.einsjannis.acacia.protocol.primitives.nbt.SlotData
 
 enum class EntityMetadataType(val typeId: Int) {
     BYTE(0),
@@ -30,31 +28,88 @@ enum class EntityMetadataType(val typeId: Int) {
     POSE(18),
 }
 
-sealed class EntityField(val type: EntityMetadataType)
-data class ByteEntityField(val value: Byte) : EntityField(EntityMetadataType.BYTE)
-data class VarIntEntityField(val value: Int) : EntityField(EntityMetadataType.VARINT)
-data class FloatEntityField(val value: Float) : EntityField(EntityMetadataType.FLOAT)
-data class StringEntityField(val value: String) : EntityField(EntityMetadataType.STRING)
-data class ChatEntityField(val value: ChatComponent) : EntityField(EntityMetadataType.CHAT)
-data class OptionalChatEntityField(val value: ChatComponent?) : EntityField(EntityMetadataType.OPTCHAT)
-data class SlotEntityField(val value: SlotData) : EntityField(EntityMetadataType.SLOT)
-data class BooleanEntityField(val value: Boolean) : EntityField(EntityMetadataType.BOOLEAN)
-data class RotationEntityField(val x: Float, val y: Float, val z: Float) :
-    EntityField(EntityMetadataType.ROTATION)
+sealed class EntityField(val type: EntityMetadataType) : PacketObject()
+class ByteEntityField : EntityField(EntityMetadataType.BYTE) {
+    var value by byte()
+}
 
-data class PositionEntityField(val position: Position) : EntityField(EntityMetadataType.POSITION)
-data class OptionalPositionEntityField(val position: Position?) : EntityField(EntityMetadataType.OPTPOSITION)
-data class DirectionEntityField(val direction: Direction) : EntityField(EntityMetadataType.DIRECTION)
-data class OptionalUUIDEntityField(val uuid: UUID?) : EntityField(EntityMetadataType.OPTUUID)
-data class OptionalBlockIdEntityField(val blockId: Int) : EntityField(EntityMetadataType.OPTBLOCKID)
-data class NbtEntityField(val nbt: NbtTag) : EntityField(EntityMetadataType.NBT)
-data class ParticleEntityField(val particle: Int) :
-    EntityField(EntityMetadataType.PARTICLE) // TODO particle data
+class VarIntEntityField : EntityField(EntityMetadataType.VARINT) {
+    var value by varInt()
+}
 
-data class VillagerDataEntityField(val villagerType: Int, val profession: Int, val level: Int) :
-    EntityField(EntityMetadataType.VILLAGER_DATA)
+class FloatEntityField : EntityField(EntityMetadataType.FLOAT) {
+    var value by float()
+}
 
-data class OptionalVarIntEntityField(val value: Int?) : EntityField(EntityMetadataType.OPTVARINT)
-data class PoseEntityField(val pose: Pose) : EntityField(EntityMetadataType.POSE)
+class StringEntityField : EntityField(EntityMetadataType.STRING) {
+    var value by string()
+}
+
+class ChatEntityField : EntityField(EntityMetadataType.CHAT) {
+    var value by chat()
+}
+
+class OptionalChatEntityField : EntityField(EntityMetadataType.OPTCHAT) {
+    var isPresent by bool()
+    var value by chat().onlyIf(::isPresent)
+}
+
+class SlotEntityField : EntityField(EntityMetadataType.SLOT) {
+    var value by slot()
+}
+
+class BooleanEntityField : EntityField(EntityMetadataType.BOOLEAN) {
+    var value by bool()
+}
+
+class RotationEntityField : EntityField(EntityMetadataType.ROTATION) {
+    var x by float()
+    var y by float()
+    var z by float()
+}
+
+class PositionEntityField : EntityField(EntityMetadataType.POSITION) {
+    val value by position()
+}
+
+class OptionalPositionEntityField : EntityField(EntityMetadataType.OPTPOSITION) {
+    val isPresent by bool()
+    val value by position().onlyIf(::isPresent)
+}
+
+class DirectionEntityField : EntityField(EntityMetadataType.DIRECTION) {
+    val value by varInt().enumOrdinalMapping<Direction>()
+}
+
+class OptionalUUIDEntityField : EntityField(EntityMetadataType.OPTUUID) {
+    var isPresent by bool()
+    val value by uuid().onlyIf(::isPresent)
+}
+
+class OptionalBlockIdEntityField : EntityField(EntityMetadataType.OPTBLOCKID) {
+    val value by varInt()
+}
+
+class NbtEntityField : EntityField(EntityMetadataType.NBT) {
+    val value by nbtTag()
+}
+
+class ParticleEntityField : EntityField(EntityMetadataType.PARTICLE) {
+    val value by `object`(::Particle)
+}
+
+class VillagerDataEntityField : EntityField(EntityMetadataType.VILLAGER_DATA) {
+    val villagerType by varInt()
+    val profession by varInt()
+    val level by varInt()
+}
+
+class OptionalVarIntEntityField : EntityField(EntityMetadataType.OPTVARINT) {
+    var value by varInt().mapped({ if (it == 0) null else it - 1 }, { if (it == null) 0 else it + 1 })
+}
+
+class PoseEntityField : EntityField(EntityMetadataType.POSE){
+    var value by varInt().enumOrdinalMapping<Pose>()
+}
 
 data class EntityDataField(val index: Int, val data: EntityField)

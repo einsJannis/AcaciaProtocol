@@ -4,6 +4,6 @@ sealed class SlotData
 object EmptySlot : SlotData()
 data class FilledSlot(
     var itemId: Int,
-    var itemCount: Int,
+    var itemCount: Byte,
     var nbt: NbtTag?,
-)
+) : SlotData()
