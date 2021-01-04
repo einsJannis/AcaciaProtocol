@@ -9,6 +9,8 @@ repositories {
     mavenCentral()
 }
 
+val ktorVersion = "1.5.0"
+
 kotlin {
     jvm {
         compilations.all {
@@ -34,7 +36,11 @@ kotlin {
 
     
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-network:$ktorVersion")
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
