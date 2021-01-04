@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform") version "1.4.21"
+    kotlin("plugin.serialization") version "1.4.21"
 }
 
 group = "dev.einsjannis"
@@ -7,6 +8,7 @@ version = "0.0.1"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 val ktorVersion = "1.5.0"
@@ -39,6 +41,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-network:$ktorVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
             }
         }
         val commonTest by getting {

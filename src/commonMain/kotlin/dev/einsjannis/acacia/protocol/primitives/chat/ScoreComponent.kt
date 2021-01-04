@@ -1,5 +1,8 @@
 package dev.einsjannis.acacia.protocol.primitives.chat
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ScoreComponent(
     var score: String,
     var name: String,

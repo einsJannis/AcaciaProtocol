@@ -1,5 +1,8 @@
 package dev.einsjannis.acacia.protocol.primitives.chat
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class KeybindComponent(
     var keybind: String,
     override var bold: Boolean? = null,
