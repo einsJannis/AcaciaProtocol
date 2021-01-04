@@ -3,6 +3,7 @@ package dev.einsjannis.acacia.protocol
 import dev.einsjannis.acacia.protocol.primitives.Flags
 import io.ktor.utils.io.*
 import kotlin.experimental.and
+import kotlin.experimental.or
 
 inline fun <reified T : Enum<T>> BaseDelegate<Int>.enumOrdinalMapping() =
     mapped({ enumValues<T>()[it] }, { it.ordinal })
@@ -23,4 +24,16 @@ suspend fun ByteReadChannel.readVarInt(): Int {
         }
     } while (read and 128.toByte() != 0.toByte())
     return result
+}
+
+suspend fun ByteWriteChannel.writeVarInt(value: Int) {
+    var work = value
+    do {
+        var temp = (work and 0b01111111).toByte()
+        work = work ushr 7
+        if (work != 0) {
+            temp = temp or 0b10000000.toByte()
+        }
+        writeByte(temp)
+    } while (work != 0)
 }

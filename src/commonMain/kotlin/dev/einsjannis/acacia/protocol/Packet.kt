@@ -13,12 +13,6 @@ import dev.einsjannis.acacia.protocol.packet.status.clientbound.Pong
 import dev.einsjannis.acacia.protocol.packet.status.clientbound.Response
 import dev.einsjannis.acacia.protocol.packet.status.serverbound.Ping
 import dev.einsjannis.acacia.protocol.packet.status.serverbound.Request
-import dev.einsjannis.acacia.protocol.primitives.Flags
-import dev.einsjannis.acacia.protocol.types.entity.EntityDataField
-import dev.einsjannis.acacia.protocol.primitives.nbt.SlotData
-import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KProperty
 
 abstract class Packet : PacketObject() {
     companion object {
@@ -93,10 +87,9 @@ abstract class Packet : PacketObject() {
             packetMeta(id, state, bound).readPacket(reader)
         fun packetMeta(id: Int, state: ConnectionState, bound: Bound): PacketMeta<out Packet> = packets
             .firstOrNull { it.id == id && it.connectionState == state && it.bound == bound } ?: throw TODO()
-        suspend inline fun <reified T : Packet> write(packet: T, state: ConnectionState, bound: Bound, writer: PrimitiveWriter): Unit =
-            packetMeta<T>(state, bound).writePacket(writer, packet)
-        inline fun <reified T : Packet> packetMeta(state: ConnectionState, bound: Bound): PacketMeta<T> = packets
-            .filterIsInstance<PacketMeta<T>>()
-            .firstOrNull { it.connectionState == state && it.bound == bound } ?: throw TODO()
+        suspend inline fun <reified T : Packet> write(packet: T, writer: PrimitiveWriter): Unit =
+            packetMeta<T>().writePacket(writer, packet)
+        inline fun <reified T : Packet> packetMeta(): PacketMeta<T> = packets
+            .filterIsInstance<PacketMeta<T>>().firstOrNull() ?: throw TODO()
     }
 }

@@ -2,14 +2,14 @@ package dev.einsjannis.acacia.protocol.primitives.chat
 
 data class SelectorComponent(
     var selector: String,
-    override var bold: Boolean,
-    override var italic: Boolean,
-    override var underlined: Boolean,
-    override var strikethrough: Boolean,
-    override var obfuscated: Boolean,
-    override var color: String,
-    override var insertion: String,
-    override var clickEvent: ChatClickEvent,
-    override var hoverEvent: ChatHoverEvent,
-    override var extra: List<ChatComponent>?
+    override var bold: Boolean? = null,
+    override var italic: Boolean? = null,
+    override var underlined: Boolean? = null,
+    override var strikethrough: Boolean? = null,
+    override var obfuscated: Boolean? = null,
+    override var color: String? = null,
+    override var insertion: String? = null,
+    override var clickEvent: ChatClickEvent? = null,
+    override var hoverEvent: ChatHoverEvent? = null,
+    override var extra: List<ChatComponent>? = null
 ) : ChatComponent

@@ -1,12 +1,30 @@
 package dev.einsjannis.acacia.protocol.io
 
-class ByteArrayWriter : AbstractWriter() {
+import kotlin.math.max
 
-    var result: ByteArray = byteArrayOf()
+class ByteArrayWriter(capacity: Int = 0) : AbstractWriter() {
+
+    var _result: ByteArray = ByteArray(capacity)
+    val result get() = _result.sliceArray(0 until size)
+    var size = 0
         private set
 
+    private inline fun ensureCapacity(minCap: Int) {
+        if (minCap + size > _result.size) {
+            _result = _result.copyOf(max(_result.size * 2 + 1, minCap + size))
+        }
+    }
+
     override fun writeByteArray(value: ByteArray) {
-        result += value
+        ensureCapacity(value.size)
+        value.copyInto(_result, size, 0)
+        size += value.size
+    }
+
+    fun writeByteArray(value: ByteArray, fromIndex: Int, toIndex: Int) {
+        ensureCapacity(toIndex - fromIndex)
+        value.copyInto(_result, size, fromIndex, toIndex)
+        size += value.size
     }
 
 }
