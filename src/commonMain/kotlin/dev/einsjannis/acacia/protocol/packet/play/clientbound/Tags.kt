@@ -1,6 +1,9 @@
 package dev.einsjannis.acacia.protocol.packet.play.clientbound
 
+import dev.einsjannis.acacia.protocol.Bound
+import dev.einsjannis.acacia.protocol.ConnectionState
 import dev.einsjannis.acacia.protocol.Packet
+import dev.einsjannis.acacia.protocol.PacketMeta
 import dev.einsjannis.acacia.protocol.types.Tag
 
 class Tags : Packet() {
@@ -12,4 +15,5 @@ class Tags : Packet() {
     var fluidTags by `object`(::Tag).array(::fluidTagsSize)
     var entityTagsSize by varInt()
     var entityTags by `object`(::Tag).array(::entityTagsSize)
+    companion object : PacketMeta<Tags>(0x5B, ConnectionState.PLAY, Bound.CLIENT, ::Tags)
 }
