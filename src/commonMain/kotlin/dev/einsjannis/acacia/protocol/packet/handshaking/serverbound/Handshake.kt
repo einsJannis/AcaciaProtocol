@@ -4,9 +4,13 @@ import dev.einsjannis.acacia.protocol.*
 
 /**
  * Handshake Packet
- * Bound: Server
- * State: Handshake
- * Id: 0x00
+ *
+ * (
+ * Bound: Server;
+ * State: Handshake;
+ * Id: 0x00;
+ * )
+ *
  * This causes the server to switch into the target state.
  */
 class Handshake : Packet() {
