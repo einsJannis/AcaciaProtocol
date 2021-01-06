@@ -52,7 +52,7 @@ abstract class AbstractReader : PrimitiveReader {
 
     override fun readDouble(): Double = Double.fromBits(readLong())
 
-    override fun readString(): String = readByteArray(readVarInt()).decodeToString()
+    override fun readString(): String = readByteArray(readVarInt()).decodeToString() //TODO: int is character amount, fix this!
 
     override fun readChat(): ChatComponent = ChatSerializer.fromString(readString())
 

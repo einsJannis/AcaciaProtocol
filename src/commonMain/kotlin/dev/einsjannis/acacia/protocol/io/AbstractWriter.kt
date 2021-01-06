@@ -9,23 +9,44 @@ import dev.einsjannis.acacia.protocol.types.Position
 import dev.einsjannis.acacia.protocol.types.entity.EntityDataField
 import kotlin.experimental.or
 
+/**
+ * Abstract implementation for a [PrimitiveWriter]
+ */
 abstract class AbstractWriter : PrimitiveWriter {
-
+    
+    /**
+     * Writes a Boolean as a Byte.
+     */
     override fun writeBoolean(value: Boolean) = writeByte(if (value) 0x01 else 0x00)
-
+    
+    /**
+     * Writes a Byte as a ByteArray.
+     */
     override fun writeByte(value: Byte) = writeByteArray(byteArrayOf(value))
-
+    
+    /**
+     * Writes a UByte as a Byte.
+     */
     override fun writeUnsignedByte(value: UByte) = writeByte(value.toByte())
-
+    
+    /**
+     * Writes a Short as a ByteArray.
+     */
     override fun writeShort(value: Short) = writeByteArray(
         byteArrayOf(
             (value.toInt() ushr 8).toByte(),
             value.toByte()
         )
     )
-
+    
+    /**
+     * Writes a UShort as a Short.
+     */
     override fun writeUnsignedShort(value: UShort) = writeShort(value.toShort())
-
+    
+    /**
+     * Writes a Int as a ByteArray.
+     */
     override fun writeInt(value: Int) = writeByteArray(
         byteArrayOf(
             (value ushr 24).toByte(),
@@ -34,7 +55,10 @@ abstract class AbstractWriter : PrimitiveWriter {
             value.toByte()
         )
     )
-
+    
+    /**
+     * Writes a Long as a ByteArray.
+     */
     override fun writeLong(value: Long) = writeByteArray(
         byteArrayOf(
             (value ushr 56).toByte(),
@@ -47,21 +71,38 @@ abstract class AbstractWriter : PrimitiveWriter {
             value.toByte()
         )
     )
-
+    
+    /**
+     * Writes a Float as a Int.
+     */
     override fun writeFloat(value: Float) = writeInt(value.toRawBits())
-
+    
+    /**
+     * Writes a Double as a Long.
+     */
     override fun writeDouble(value: Double) = writeLong(value.toRawBits())
-
+    
+    /**
+     * Writes a String as a ByteArray with the size prefixed as a VarInt.
+     */
     override fun writeString(value: String) {
-        val array = value.encodeToByteArray()
-        writeVarInt(array.size)
-        writeByteArray(array)
+        writeVarInt(value.length)
+        writeByteArray(value.encodeToByteArray())
     }
-
+    
+    /**
+     * Writes a ChatComponent as a String.
+     */
     override fun writeChat(value: ChatComponent) = writeString(ChatSerializer.toString(value))
-
+    
+    /**
+     * Writes a Identifier as a String.
+     */
     override fun writeIdentifier(value: Identifier) = writeString(value.toString())
-
+    
+    /**
+     * Writes a Int as a VarInt.
+     */
     override fun writeVarInt(value: Int) {
         var work = value
         do {
@@ -73,7 +114,10 @@ abstract class AbstractWriter : PrimitiveWriter {
             writeByte(temp)
         } while (work != 0)
     }
-
+    
+    /**
+     * Writes a Long as a VarLong.
+     */
     override fun writeVarLong(value: Long) {
         var work = value
         do {
@@ -83,7 +127,10 @@ abstract class AbstractWriter : PrimitiveWriter {
             writeByte(temp)
         } while (work != 0L)
     }
-
+    
+    /**
+     * Writes EntityMeta as a ByteArray.
+     */
     override fun writeEntityMetadata(value: List<EntityDataField>) {
         value.forEach {
             writeUnsignedByte(it.index.toUByte())
@@ -92,7 +139,10 @@ abstract class AbstractWriter : PrimitiveWriter {
         }
         writeUnsignedByte(0xFF.toUByte())
     }
-
+    
+    /**
+     * Writes a Slot as a ByteArray.
+     */
     override fun writeSlot(value: SlotData) {
         when (value) {
             EmptySlot -> writeBoolean(false)
@@ -103,12 +153,15 @@ abstract class AbstractWriter : PrimitiveWriter {
             }
         }
     }
-
+    
+    /**
+     * Writes a NbtTag as a ByteArray.
+     */
     override fun writeNBTTag(value: NbtTag) {
         writeByte(value.type.id)
         writeNBTTagRaw(value)
     }
-
+    
     private fun writeNBTTagRaw(value: NbtTag) {
         when (value) {
             is ByteTag -> writeByte(value.value)
@@ -153,10 +206,16 @@ abstract class AbstractWriter : PrimitiveWriter {
             }
         }
     }
-
+    
+    /**
+     * Writes a Position as a Long.
+     */
     override fun writePosition(value: Position) =
         writeLong(value.x.toLong() and 0x3FFFFFF shl 38 or (value.z.toLong() and 0x3FFFFFF shl 12) or (value.y.toLong() and 0xFFF))
-
+    
+    /**
+     * Writes a UUID as two Longs.
+     */
     override fun writeUUID(value: UUID) {
         writeLong(value.upper)
         writeLong(value.lower)
