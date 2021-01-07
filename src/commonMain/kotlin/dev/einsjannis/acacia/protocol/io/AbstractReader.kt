@@ -9,25 +9,46 @@ import dev.einsjannis.acacia.protocol.types.Position
 import dev.einsjannis.acacia.protocol.types.entity.*
 import kotlin.experimental.and
 
+/**
+ * Abstract implementation of [PrimitiveReader]
+ */
 abstract class AbstractReader : PrimitiveReader {
-
+    
+    /**
+     * Reads a Byte as a Boolean.
+     */
     override fun readBoolean(): Boolean = when (readByte()) {
         0x01.toByte() -> true
         0x00.toByte() -> false
         else -> throw IllegalStateException()
     }
-
+    
+    /**
+     * Reads a ByteArray as a Byte.
+     */
     override fun readByte(): Byte = readByteArray(1).first()
-
+    
+    /**
+     * Reads a Byte as a UByte.
+     */
     override fun readUnsignedByte(): UByte = readByte().toUByte()
-
+    
+    /**
+     * Reads a ByteArray as a Short.
+     */
     override fun readShort(): Short {
         val array = readByteArray(2)
         return (array[0].toInt() shl 8 or array[1].toInt()).toShort()
     }
-
+    
+    /**
+     * Reads a Short as a UShort.
+     */
     override fun readUnsignedShort(): UShort = readShort().toUShort()
-
+    
+    /**
+     * Reads a ByteArray as a Int.
+     */
     override fun readInt(): Int {
         val array = readByteArray(4)
         return (array[0].toInt() shl 24) or
@@ -35,7 +56,10 @@ abstract class AbstractReader : PrimitiveReader {
             (array[2].toInt() shl 8) or
             array[3].toInt()
     }
-
+    
+    /**
+     * Reads a ByteArray as a Long.
+     */
     override fun readLong(): Long {
         val array = readByteArray(4)
         return (array[0].toLong() shl 56) or
@@ -47,17 +71,35 @@ abstract class AbstractReader : PrimitiveReader {
             (array[6].toLong() shl 8) or
             array[7].toLong()
     }
-
+    
+    /**
+     * Reads a Int as a Float.
+     */
     override fun readFloat(): Float = Float.fromBits(readInt())
-
+    
+    /**
+     * Reads a Long as a Double.
+     */
     override fun readDouble(): Double = Double.fromBits(readLong())
-
+    
+    /**
+     * Reads a VarInt and a ByteArray as a String.
+     */
     override fun readString(): String = readByteArray(readVarInt()).decodeToString() //TODO: int is character amount, fix this!
-
+    
+    /**
+     * Reads a String as a ChatComponent.
+     */
     override fun readChat(): ChatComponent = ChatSerializer.fromString(readString())
-
+    
+    /**
+     * Reads a String as a Identifier
+     */
     override fun readIdentifier(): Identifier = Identifier.from(readString())
-
+    
+    /**
+     * Reads Bytes as a Int.
+     */
     override fun readVarInt(): Int {
         var numRead = 0
         var result = 0
@@ -73,7 +115,10 @@ abstract class AbstractReader : PrimitiveReader {
         } while (read and 128.toByte() != 0.toByte())
         return result
     }
-
+    
+    /**
+     * Reads Bytes as a Long.
+     */
     override fun readVarLong(): Long {
         var numRead = 0
         var result: Long = 0
@@ -89,7 +134,10 @@ abstract class AbstractReader : PrimitiveReader {
         } while (read and 128.toByte() != 0.toByte())
         return result
     }
-
+    
+    /**
+     * Reads a ByteArray as Entity Metadata.
+     */
     override fun readEntityMetadata(): List<EntityDataField> = buildList {
         while (true) {
             val index = readUnsignedByte().toInt()
@@ -120,7 +168,10 @@ abstract class AbstractReader : PrimitiveReader {
             add(EntityDataField(index, obj))
         }
     }
-
+    
+    /**
+     * Reads a ByteArray as a Slot
+     */
     override fun readSlot(): SlotData = if (readBoolean()) {
         val itemId = readVarInt()
         val itemCount = readByte()
@@ -129,7 +180,10 @@ abstract class AbstractReader : PrimitiveReader {
             nbt = null
         FilledSlot(itemId, itemCount, nbt)
     } else EmptySlot
-
+    
+    /**
+     * Reads a ByteArray as a NBTTag.
+     */
     override fun readNBTTag(): NbtTag = readNBTTag(NbtTypeId.values()[readByte().toInt()])
     private fun readNBTTag(type: NbtTypeId): NbtTag = when (type) {
         NbtTypeId.END -> ENDTag
@@ -165,11 +219,18 @@ abstract class AbstractReader : PrimitiveReader {
         NbtTypeId.INT_ARRAY -> IntArrayTag(IntArray(readInt()) { readInt() })
         NbtTypeId.LONG_ARRAY -> LongArrayTag(LongArray(readInt()) { readLong() })
     }
-
+    
+    /**
+     * Reads a Long as a Position.
+     */
     override fun readPosition(): Position {
         val value = readLong()
         return Position((value ushr 38).toInt(), (value and 0xFFF).toInt(), (value shl 26 ushr 38).toInt())
     }
-
+    
+    /**
+     * Reads two Longs as a UUID.
+     */
     override fun readUUID(): UUID = UUID(readLong(), readLong())
+    
 }
