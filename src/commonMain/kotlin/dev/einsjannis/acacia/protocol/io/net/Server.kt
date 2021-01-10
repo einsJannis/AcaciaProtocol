@@ -11,17 +11,18 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
-data class ClientIncomingPackage<T : Packet>(val client: ServerClient, val packet: T)
-class Server(
+data class ClientIncomingPackage<CLIENTDATA, T : Packet>(val client: ServerClient<CLIENTDATA>, val packet: T)
+class Server<CLIENTDATA>(
     val scope: CoroutineScope,
     val ip: String,
-    val port: Int
+    val port: Int,
+    val dataConstructor: ()->CLIENTDATA,
 ) {
     var serverSocket: ServerSocket? = null
     var running = false
     var job: Job? = null
-    val connectedClients = mutableListOf<Client>()
-    val incomingPackets = Channel<ClientIncomingPackage<*>>()
+    val connectedClients = mutableListOf<ServerClient<CLIENTDATA>>()
+    val incomingPackets = Channel<ClientIncomingPackage<CLIENTDATA, *>>()
 
     @OptIn(InternalAPI::class)
     fun run() {
@@ -31,7 +32,7 @@ class Server(
             serverSocket = aSocket(SelectorManager(scope.coroutineContext)).tcp().bind(NetworkAddress(ip, port))
             while (running) {
                 val socket = serverSocket!!.accept()
-                val c = ServerClient(scope, socket, this@Server)
+                val c = ServerClient(scope, socket, this@Server, dataConstructor())
                 connectedClients.add(c)
                 c.run()
             }

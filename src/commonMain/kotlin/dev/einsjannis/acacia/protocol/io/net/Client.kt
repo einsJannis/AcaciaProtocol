@@ -139,9 +139,8 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
 
 }
 
-class ServerClient(scope: CoroutineScope, socket: Socket, val server: Server) : Client(scope, socket) {
+class ServerClient<DATA>(scope: CoroutineScope, socket: Socket, val server: Server<DATA>, val data: DATA) : Client(scope, socket) {
     override val bound: Bound = Bound.SERVER
-    var username: String? = null
     override suspend fun distributeInboundPacket(packet: Packet) {
         super.distributeInboundPacket(packet)
         server.incomingPackets.send(ClientIncomingPackage(this, packet))
