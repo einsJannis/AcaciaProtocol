@@ -23,12 +23,14 @@ import dev.einsjannis.acacia.protocol.packet.play.clientbound.Disconnect as Play
 
 data class PacketWithMeta<T : Packet>(val p: T, val meta: PacketMeta<T>)
 
-class Client(val scope: CoroutineScope, val socket: Socket, val bound: Bound) {
+open class Client(val scope: CoroutineScope, val socket: Socket) {
     enum class State {
         RUNNING,
         CLOSING,
         CLOSED
     }
+
+    open val bound = Bound.CLIENT
 
     var closeOnUnnecessaryCompression: Boolean = false
     var connectionState: ConnectionState = ConnectionState.HANDSHAKE
@@ -84,8 +86,13 @@ class Client(val scope: CoroutineScope, val socket: Socket, val bound: Bound) {
                     decodePacket(decompressedBytes)
                 }
             } else decodePacket(bytes)
-            inboundChannel.send(packet)
+            distributeInboundPacket(packet)
         }
+    }
+
+    protected open suspend fun distributeInboundPacket(packet: Packet) {
+        inboundChannel.send(packet)
+
     }
 
     suspend fun handleOutbound() {
@@ -120,7 +127,7 @@ class Client(val scope: CoroutineScope, val socket: Socket, val bound: Bound) {
     suspend fun decodePacket(bytes: ByteArray): Packet {
         val byteArrayReader = ByteArrayReader(bytes)
         val id = byteArrayReader.readVarInt()
-        return Packet.read(id, connectionState, Bound.SERVER, byteArrayReader)
+        return Packet.read(id, connectionState, bound, byteArrayReader)
     }
 
     suspend fun <T : Packet> encodePacket(packet: PacketWithMeta<T>): ByteArrayWriter {
@@ -130,4 +137,13 @@ class Client(val scope: CoroutineScope, val socket: Socket, val bound: Bound) {
         return byteArrayWriter
     }
 
+}
+
+class ServerClient(scope: CoroutineScope, socket: Socket, val server: Server) : Client(scope, socket) {
+    override val bound: Bound = Bound.SERVER
+    var username: String? = null
+    override suspend fun distributeInboundPacket(packet: Packet) {
+        super.distributeInboundPacket(packet)
+        server.incomingPackets.send(ClientIncomingPackage(this, packet))
+    }
 }
