@@ -9,7 +9,7 @@ import dev.einsjannis.acacia.protocol.packet.login.clientbound.*
 import dev.einsjannis.acacia.protocol.packet.login.clientbound.Disconnect as StateDisconnect
 import dev.einsjannis.acacia.protocol.packet.login.serverbound.*
 import dev.einsjannis.acacia.protocol.packet.play.clientbound.*
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.CloseWindow
+import dev.einsjannis.acacia.protocol.packet.play.clientbound.CloseWindow as ClientCloseWindow
 import dev.einsjannis.acacia.protocol.packet.play.clientbound.Disconnect as PlayDisconnect
 import dev.einsjannis.acacia.protocol.packet.play.clientbound.ChatMessage as ClientChatMessage
 import dev.einsjannis.acacia.protocol.packet.play.clientbound.HeldItemChange as ClientHeldItemChange
@@ -19,6 +19,7 @@ import dev.einsjannis.acacia.protocol.packet.play.clientbound.PluginMessage as C
 import dev.einsjannis.acacia.protocol.packet.play.clientbound.TabComplete as ClientTabComplete
 import dev.einsjannis.acacia.protocol.packet.play.clientbound.WindowConfirmation as ClientWindowConfirmation
 import dev.einsjannis.acacia.protocol.packet.play.serverbound.*
+import dev.einsjannis.acacia.protocol.packet.play.serverbound.CloseWindow as ServerCloseWindow
 import dev.einsjannis.acacia.protocol.packet.play.serverbound.ChatMessage as ServerChatMessage
 import dev.einsjannis.acacia.protocol.packet.play.serverbound.HeldItemChange as ServerHeldItemChange
 import dev.einsjannis.acacia.protocol.packet.play.serverbound.KeepAlive as ServerKeepAlive
@@ -92,7 +93,7 @@ abstract class Packet : PacketObject() {
             ChangeGameState,
             ClientChatMessage,
             ChunkData,
-            CloseWindow,
+            ClientCloseWindow,
             CollectItem,
             CombatEvent,
             CraftRecipeResponse,
@@ -179,7 +180,7 @@ abstract class Packet : PacketObject() {
             ClickWindowButton,
             ClientSettings,
             ClientStatus,
-            CloseWindow,
+            ServerCloseWindow,
             CraftRecipeRequest,
             CreativeInventoryAction,
             EditBook,
