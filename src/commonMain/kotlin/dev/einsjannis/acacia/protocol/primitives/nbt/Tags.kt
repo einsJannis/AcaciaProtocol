@@ -41,7 +41,7 @@ data class ByteArrayTag(var value: ByteArray) : NbtTag(NbtTypeId.BYTE_ARRAY) {
 }
 
 data class StringTag(var value: String) : NbtTag(NbtTypeId.STRING)
-data class ListTag(var typeId: NbtTypeId, var values: List<NbtTag>) : NbtTag(NbtTypeId.LIST)
+data class ListTag<V:NbtTag>(var typeId: NbtTypeId, var values: List<V>) : NbtTag(NbtTypeId.LIST)
 data class CompoundTag(var map: Map<String, NbtTag>) : NbtTag(NbtTypeId.COMPOUND)
 data class IntArrayTag(var value: IntArray) : NbtTag(NbtTypeId.INT_ARRAY) {
     override fun equals(other: Any?): Boolean {
