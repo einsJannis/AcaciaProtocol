@@ -4,6 +4,9 @@ import dev.einsjannis.acacia.protocol.Bound
 import dev.einsjannis.acacia.protocol.ConnectionState
 import dev.einsjannis.acacia.protocol.Packet
 import dev.einsjannis.acacia.protocol.PacketMeta
+import dev.einsjannis.acacia.protocol.exception.NoConnectionException
+import dev.einsjannis.acacia.protocol.exception.UnexpectedDecompressedLengthException
+import dev.einsjannis.acacia.protocol.exception.UnnecessaryCompressionException
 import dev.einsjannis.acacia.protocol.io.ByteArrayReader
 import dev.einsjannis.acacia.protocol.io.ByteArrayWriter
 import dev.einsjannis.acacia.protocol.primitives.chat.StringComponent
@@ -79,10 +82,11 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
                     decodePacket(byteReader.readByteArray(byteReader.remainingBytes))
                 } else {
                     if (dataLength < compressionThreshold && closeOnUnnecessaryCompression) {
-                        throw TODO("gute exception und closen")
+                        shutdownGracefully()
+                        throw UnnecessaryCompressionException(compressionThreshold, dataLength, bound)
                     }
                     val decompressedBytes = ZlibWrapper.uncompress(byteReader.readByteArray(byteReader.remainingBytes))
-                    if (decompressedBytes.size != dataLength) throw TODO("was")
+                    if (decompressedBytes.size != dataLength) throw UnexpectedDecompressedLengthException(dataLength, decompressedBytes.size, bytes, decompressedBytes)
                     decodePacket(decompressedBytes)
                 }
             } else decodePacket(bytes)
@@ -92,7 +96,6 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
 
     protected open suspend fun distributeInboundPacket(packet: Packet) {
         inboundChannel.send(packet)
-
     }
 
     suspend fun handleOutbound() {
@@ -120,7 +123,7 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
     }
 
     suspend inline fun <reified T : Packet> send(packet: T) {
-        if (state != State.RUNNING) throw TODO()
+        if (state != State.RUNNING) throw NoConnectionException(this)
         outboundChannel.send(PacketWithMeta(packet, Packet.packetMeta()))
     }
 

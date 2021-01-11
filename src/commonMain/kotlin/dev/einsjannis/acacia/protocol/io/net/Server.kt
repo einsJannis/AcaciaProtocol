@@ -26,15 +26,15 @@ class Server<CLIENTDATA>(
 
     @OptIn(InternalAPI::class)
     fun run() {
-        if (running) throw TODO()
+        if (running) return
         running = true
         job = scope.launch {
             serverSocket = aSocket(SelectorManager(scope.coroutineContext)).tcp().bind(NetworkAddress(ip, port))
             while (running) {
                 val socket = serverSocket!!.accept()
-                val c = ServerClient(scope, socket, this@Server, dataConstructor())
-                connectedClients.add(c)
-                c.run()
+                val client = ServerClient(scope, socket, this@Server, dataConstructor())
+                connectedClients.add(client)
+                client.run()
             }
             serverSocket!!.close()
         }
