@@ -2,6 +2,7 @@ package limboserver
 
 import dev.einsjannis.acacia.protocol.ConnectionState
 import dev.einsjannis.acacia.protocol.add
+import dev.einsjannis.acacia.protocol.build
 import dev.einsjannis.acacia.protocol.io.net.Server
 import dev.einsjannis.acacia.protocol.nbtCompoundTag
 import dev.einsjannis.acacia.protocol.packet.handshaking.serverbound.Handshake
@@ -38,19 +39,19 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                     is Handshake -> client.connectionState = packet.nextState
                     is LoginStart -> {
                         client.data.username = packet.name
-                        client.send(LoginSuccess().also {
-                            it.username = packet.name
-                            it.uniqueId = UUID(0L, 0L)
+                        client.send(LoginSuccess.build {
+                            username = packet.name
+                            uniqueId = UUID(0L, 0L)
                         })
                         client.connectionState = ConnectionState.PLAY
 
-                        client.send(JoinGame().also {
-                            it.entityId = 1
-                            it.isHardcore = false
-                            it.gamemode = Gamemode.ADVENTURE
-                            it.previousGamemode = null
-                            it.worldNames = listOf(owoWorld)
-                            it.dimensionCodec = nbtCompoundTag {
+                        client.send(JoinGame.build {
+                            entityId = 1
+                            isHardcore = false
+                            gamemode = Gamemode.ADVENTURE
+                            previousGamemode = null
+                            worldNames = listOf(owoWorld)
+                            dimensionCodec = nbtCompoundTag {
                                 compound("minecraft:dimension_type") {
                                     string("type", "minecraft:dimension_type")
                                     list<CompoundTag>("value", NbtTypeId.COMPOUND) {
@@ -106,7 +107,7 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                                     }
                                 }
                             }
-                            it.dimension = nbtCompoundTag {
+                            dimension = nbtCompoundTag {
                                 string("name", "minecraft:overworld")
                                 int("id", 0)
                                 compound("element") {
@@ -125,40 +126,40 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                                     byte("has_ceiling", 0)
                                 }
                             }
-                            it.worldName = owoWorld
-                            it.hashedSeed = 0L
-                            it.maxPlayers = 0
-                            it.viewDistance = 2
-                            it.reducedDebugInfo = true
-                            it.enableRespawnScreen = false
-                            it.isDebug = false
-                            it.isFlat = true
+                            worldName = owoWorld
+                            hashedSeed = 0L
+                            maxPlayers = 0
+                            viewDistance = 2
+                            reducedDebugInfo = true
+                            enableRespawnScreen = false
+                            isDebug = false
+                            isFlat = true
                         })
-                        client.send(ServerDifficulty().also {
-                            it.difficulty = Difficulty.PEACEFUL
-                            it.locked = true
+                        client.send(ServerDifficulty.build {
+                            difficulty = Difficulty.PEACEFUL
+                            locked = true
                         })
-                        client.send(SpawnPosition().also {
-                            it.location = Position(0, 100, 0)
+                        client.send(SpawnPosition.build {
+                            location = Position(0, 100, 0)
                         })
-                        client.send(PlayerAbilities().also {
-                            it.fieldOfViewMod = 0.1f
-                            it.flyingSpeed = 0.1f
-                            it.flags = PlayerAbilityFlags(0)
+                        client.send(PlayerAbilities.build {
+                            fieldOfViewMod = 0.1f
+                            flyingSpeed = 0.1f
+                            flags = PlayerAbilityFlags(0)
                         })
-                        client.send(PlayerPositionAndLook().also {
-                            it.flags = 0
-                            it.pitch = 0f
-                            it.yaw = 0f
-                            it.x = 0.0
-                            it.y = 100.0
-                            it.z = 0.0
-                            it.teleportId = 0 // TODO check for confirm
+                        client.send(PlayerPositionAndLook.build {
+                            flags = 0
+                            pitch = 0f
+                            yaw = 0f
+                            x = 0.0
+                            y = 100.0
+                            z = 0.0
+                            teleportId = 0 // TODO check for confirm
                         })
-                        client.send(DeclareCommands().also {
-                            it.count = 0
-                            it.nodes = listOf()
-                            it.rootIndex = 0
+                        client.send(DeclareCommands.build {
+                            count = 0
+                            nodes = listOf()
+                            rootIndex = 0
                         })
                         // TODO send spawn chunks
                     }
