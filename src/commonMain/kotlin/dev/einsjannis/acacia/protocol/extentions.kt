@@ -38,4 +38,6 @@ suspend fun ByteWriteChannel.writeVarInt(value: Int) {
     } while (work != 0)
 }
 
-fun <T : Packet> PacketMeta<T>.build(builder: T.() -> Unit): T = this.constrctor().also(builder)
+fun <T : PacketObject> T.build(builder: T.() -> Unit): T = this.also(builder)
+
+fun <T : Packet> PacketMeta<T>.build(builder: T.() -> Unit): T = this.constrctor().build(builder)
