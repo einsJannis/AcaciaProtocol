@@ -1,20 +1,11 @@
 package limboserver
 
-import dev.einsjannis.acacia.protocol.ConnectionState
-import dev.einsjannis.acacia.protocol.add
-import dev.einsjannis.acacia.protocol.build
+import dev.einsjannis.acacia.protocol.*
 import dev.einsjannis.acacia.protocol.io.net.Server
-import dev.einsjannis.acacia.protocol.nbtCompoundTag
 import dev.einsjannis.acacia.protocol.packet.handshaking.serverbound.Handshake
 import dev.einsjannis.acacia.protocol.packet.login.clientbound.LoginSuccess
 import dev.einsjannis.acacia.protocol.packet.login.serverbound.LoginStart
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.DeclareCommands
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.JoinGame
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.PlayerAbilities
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.PlayerAbilityFlags
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.PlayerPositionAndLook
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.ServerDifficulty
-import dev.einsjannis.acacia.protocol.packet.play.clientbound.SpawnPosition
+import dev.einsjannis.acacia.protocol.packet.play.clientbound.*
 import dev.einsjannis.acacia.protocol.primitives.Identifier
 import dev.einsjannis.acacia.protocol.primitives.UUID
 import dev.einsjannis.acacia.protocol.primitives.nbt.CompoundTag
@@ -30,7 +21,7 @@ class ClientData(var username: String? = null) {
 
 class Test(val scope: CoroutineScope, ip: String, port: Int) {
     val server = Server(scope, ip, port, ::ClientData)
-    val owoWorld = Identifier("minecraft", "overworld")
+    val owoWorld = Identifier("acacia", "limbo")
     fun run() {
         server.run()
         scope.launch {
@@ -56,7 +47,7 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                                     string("type", "minecraft:dimension_type")
                                     list<CompoundTag>("value", NbtTypeId.COMPOUND) {
                                         add {
-                                            string("name", "minecraft:overworld")
+                                            string("name", owoWorld.toString())
                                             int("id", 0)
                                             compound("element") {
                                                 byte("piglin_safe", 0)
@@ -66,7 +57,7 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                                                 byte("respawn_anchor_works", 0)
                                                 byte("has_skylight", 1)
                                                 byte("bed_works", 1)
-                                                string("effects", "minecraft:overworld")
+                                                string("effects", "minecraft:end")
                                                 byte("has_raids", 1)
                                                 int("logical_height", 256)
                                                 double("coordinate_scale", 1.0)
@@ -81,15 +72,15 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                                     string("type", "minecraft:worldgen/biome")
                                     list<CompoundTag>("value", NbtTypeId.COMPOUND) {
                                         add {
-                                            string("name", "minecraft:plains")
+                                            string("name", "acacia:limbo")
                                             int("id", 1)
                                             compound("element") {
                                                 string("precipation", "rain")
                                                 compound("effects") {
-                                                    int("skycolor", 7907327)
-                                                    int("waterfogcolor", 329011)
-                                                    int("fog_color", 12638463)
-                                                    int("water_color", 4159204)
+                                                    int("skycolor", 0)
+                                                    int("waterfogcolor", 0)
+                                                    int("fog_color", 0)
+                                                    int("water_color", 0)
                                                     compound("mood_sound") {
                                                         int("tick_delay", 6000)
                                                         double("offset", 2.0)
@@ -108,7 +99,7 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                                 }
                             }
                             dimension = nbtCompoundTag {
-                                string("name", "minecraft:overworld")
+                                string("name", owoWorld.toString())
                                 int("id", 0)
                                 compound("element") {
                                     byte("piglin_safe", 0)
@@ -118,7 +109,7 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                                     byte("respawn_anchor_works", 0)
                                     byte("has_skylight", 1)
                                     byte("bed_works", 1)
-                                    string("effects", "minecraft:overworld")
+                                    string("effects", "minecraft:end")
                                     byte("has_raids", 1)
                                     int("logical_height", 256)
                                     double("coordinate_scale", 1.0)
@@ -161,7 +152,7 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                             nodes = listOf()
                             rootIndex = 0
                         })
-                        // TODO send spawn chunks
+                        //TODO: send chunk data + rework chunk data
                     }
 
                 }
