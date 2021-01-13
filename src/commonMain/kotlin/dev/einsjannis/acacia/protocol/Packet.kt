@@ -29,7 +29,8 @@ import dev.einsjannis.acacia.protocol.packet.play.serverbound.TabComplete as Ser
 import dev.einsjannis.acacia.protocol.packet.play.serverbound.WindowConfirmation as ServerWindowConfirmation
 
 /**
- * Base Packet class, used to differentiate between packets and [PacketObject]s
+ * Base Packet class, used to differentiate between packets and [PacketObject]s. Companion object of implementations
+ * should implement [PacketMeta].
  */
 abstract class Packet : PacketObject() {
 
