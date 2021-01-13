@@ -14,4 +14,8 @@ class ArrayDelegate<T>(val elementDelegate: BaseDelegate<T>, val getSize: (remai
     override fun read(reader: PrimitiveReader): List<T> = (0 until getSize(reader.remainingBytes)).map { elementDelegate.read(reader) }
     override fun write(writer: PrimitiveWriter, value: List<T>) =
         value.forEach { elementDelegate.write(writer, it) }
+    
+    override val isValid: Boolean
+        get() = super.isValid && getSize(_value!!.size) == _value!!.size
+    
 }

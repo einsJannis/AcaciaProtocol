@@ -10,7 +10,7 @@ abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
 
     internal var child: BaseDelegate<*>? = null
 
-    private var _value: T? = null
+    protected var _value: T? = null
 
     private fun <V, C : BaseDelegate<V>> child(child: C): C {
         this.child = child
@@ -58,5 +58,7 @@ abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
 
     abstract fun write(writer: PrimitiveWriter, value: T)
     abstract fun read(reader: PrimitiveReader): T
+    
+    open val isValid: Boolean get() = _value != null
 
 }

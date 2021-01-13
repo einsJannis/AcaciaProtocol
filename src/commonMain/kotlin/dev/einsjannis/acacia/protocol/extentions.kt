@@ -1,5 +1,6 @@
 package dev.einsjannis.acacia.protocol
 
+import dev.einsjannis.acacia.protocol.exception.InvalidPacketObjectException
 import dev.einsjannis.acacia.protocol.primitives.Flags
 import io.ktor.utils.io.*
 import kotlin.experimental.and
@@ -38,6 +39,10 @@ suspend fun ByteWriteChannel.writeVarInt(value: Int) {
     } while (work != 0)
 }
 
-fun <T : PacketObject> T.build(builder: T.() -> Unit): T = this.also(builder)
+fun <T : PacketObject> T.build(builder: T.() -> Unit): T {
+    also(builder)
+    if (!isValid) throw InvalidPacketObjectException(this)
+    return this
+}
 
 fun <T : Packet> PacketMeta<T>.build(builder: T.() -> Unit): T = this.constrctor().build(builder)

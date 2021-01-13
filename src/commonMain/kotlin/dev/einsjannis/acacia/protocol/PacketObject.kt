@@ -144,5 +144,7 @@ abstract class PacketObject {
      */
     protected fun <T : PacketObject> `object`(objectConstructor: () -> T) =
         delegate(ObjectDelegate(objectConstructor))
-
+    
+    val isValid: Boolean get() = delegates.all { it.isValid }
+    
 }

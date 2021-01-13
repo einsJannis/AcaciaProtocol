@@ -7,4 +7,8 @@ class ObjectDelegate<T : PacketObject>(val packetObjectConstructor: () -> T) : B
     override fun read(reader: PrimitiveReader): T = packetObjectConstructor()
         .also { it.delegates.forEach { it.readValue(reader) } }
     override fun write(writer: PrimitiveWriter, value: T) = value.delegates.forEach { it.writeValue(writer) }
+    
+    override val isValid: Boolean
+        get() = super.isValid && _value!!.isValid
+    
 }

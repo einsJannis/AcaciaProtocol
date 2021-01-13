@@ -16,4 +16,8 @@ class OptionalDelegate<T>(
     override fun read(reader: PrimitiveReader): T? = if (isPresent()) elementDelegate.read(reader) else null
     override fun write(writer: PrimitiveWriter, value: T?): Unit =
         value?.let { elementDelegate.write(writer, it) } ?: Unit
+    
+    override val isValid: Boolean
+        get() = super.isValid || !isPresent()
+    
 }
