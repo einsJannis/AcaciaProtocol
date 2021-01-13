@@ -1,7 +1,7 @@
 package dev.einsjannis.acacia.protocol.io
 
+import dev.einsjannis.UUID
 import dev.einsjannis.acacia.protocol.primitives.Identifier
-import dev.einsjannis.acacia.protocol.primitives.UUID
 import dev.einsjannis.acacia.protocol.primitives.chat.ChatComponent
 import dev.einsjannis.acacia.protocol.primitives.chat.ChatSerializer
 import dev.einsjannis.acacia.protocol.primitives.nbt.*

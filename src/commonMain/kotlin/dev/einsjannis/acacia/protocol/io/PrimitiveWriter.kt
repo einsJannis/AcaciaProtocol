@@ -1,11 +1,11 @@
 package dev.einsjannis.acacia.protocol.io
 
+import dev.einsjannis.UUID
 import dev.einsjannis.acacia.protocol.primitives.Identifier
 import dev.einsjannis.acacia.protocol.primitives.chat.ChatComponent
 import dev.einsjannis.acacia.protocol.types.entity.EntityDataField
 import dev.einsjannis.acacia.protocol.primitives.nbt.NbtTag
 import dev.einsjannis.acacia.protocol.types.Position
-import dev.einsjannis.acacia.protocol.primitives.UUID
 import dev.einsjannis.acacia.protocol.primitives.nbt.SlotData
 
 /**

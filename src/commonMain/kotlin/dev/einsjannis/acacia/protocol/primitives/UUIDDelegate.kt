@@ -1,5 +1,6 @@
 package dev.einsjannis.acacia.protocol.primitives
 
+import dev.einsjannis.UUID
 import dev.einsjannis.acacia.protocol.BaseDelegate
 import dev.einsjannis.acacia.protocol.io.PrimitiveReader
 import dev.einsjannis.acacia.protocol.io.PrimitiveWriter

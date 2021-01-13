@@ -1,5 +1,6 @@
 package limboserver
 
+import dev.einsjannis.UUID
 import dev.einsjannis.acacia.protocol.*
 import dev.einsjannis.acacia.protocol.io.net.Server
 import dev.einsjannis.acacia.protocol.packet.handshaking.serverbound.Handshake
@@ -7,7 +8,6 @@ import dev.einsjannis.acacia.protocol.packet.login.clientbound.LoginSuccess
 import dev.einsjannis.acacia.protocol.packet.login.serverbound.LoginStart
 import dev.einsjannis.acacia.protocol.packet.play.clientbound.*
 import dev.einsjannis.acacia.protocol.primitives.Identifier
-import dev.einsjannis.acacia.protocol.primitives.UUID
 import dev.einsjannis.acacia.protocol.primitives.nbt.CompoundTag
 import dev.einsjannis.acacia.protocol.primitives.nbt.NbtTypeId
 import dev.einsjannis.acacia.protocol.types.Difficulty
@@ -16,7 +16,7 @@ import dev.einsjannis.acacia.protocol.types.Position
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class ClientData(var username: String? = null) {
+class ClientData(var username: String? = null, var uuid: UUID? = null) {
 }
 
 class Test(val scope: CoroutineScope, ip: String, port: Int) {
@@ -30,9 +30,10 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
                     is Handshake -> client.connectionState = packet.nextState
                     is LoginStart -> {
                         client.data.username = packet.name
+                        client.data.uuid = UUID.random()
                         client.send(LoginSuccess.build {
                             username = packet.name
-                            uniqueId = UUID(0L, 0L)
+                            uniqueId = client.data.uuid!!
                         })
                         client.connectionState = ConnectionState.PLAY
 

@@ -1,7 +1,7 @@
 package dev.einsjannis.acacia.protocol.io
 
+import dev.einsjannis.UUID
 import dev.einsjannis.acacia.protocol.primitives.Identifier
-import dev.einsjannis.acacia.protocol.primitives.UUID
 import dev.einsjannis.acacia.protocol.primitives.chat.ChatComponent
 import dev.einsjannis.acacia.protocol.primitives.chat.ChatSerializer
 import dev.einsjannis.acacia.protocol.primitives.nbt.*
@@ -179,7 +179,7 @@ abstract class AbstractWriter : PrimitiveWriter {
                 writeUnsignedShort(array.size.toUShort())
                 writeByteArray(array)
             }
-            is ListTag -> {
+            is ListTag<*> -> {
                 writeByte(value.typeId.id)
                 writeInt(value.values.size)
                 value.values.forEach { writeNBTTagRaw(it) }
