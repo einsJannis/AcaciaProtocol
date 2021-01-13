@@ -53,6 +53,8 @@ abstract class BaseDelegate<T> : ReadWriteProperty<PacketObject, T> {
 
     fun <V> mapped(values: Map<T, V>): MappedDelegate<V, T> =
         mapped(values, values.map { (k, v) -> v to k }.toMap())
+    
+    fun byteArray() = ObjectByteArrayDelegate(this)
 
     abstract fun write(writer: PrimitiveWriter, value: T)
     abstract fun read(reader: PrimitiveReader): T
