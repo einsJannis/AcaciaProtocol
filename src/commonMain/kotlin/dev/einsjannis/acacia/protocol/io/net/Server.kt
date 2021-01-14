@@ -42,9 +42,9 @@ class Server<CLIENTDATA>(
     }
 
     fun shutdownGracefully(sendDisconnect: Boolean = true, disconnectMessage: String = "Server shut down") {
-        connectedClients.forEach { it.shutdownGracefully(sendDisconnect, disconnectMessage) }
         running = false
         scope.runMultiplatformBlocking { job?.join() }
+        connectedClients.forEach { it.shutdownGracefully(sendDisconnect, disconnectMessage) }
     }
 
 }
