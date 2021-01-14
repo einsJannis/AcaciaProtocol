@@ -14,6 +14,7 @@ import dev.einsjannis.acacia.protocol.types.Difficulty
 import dev.einsjannis.acacia.protocol.types.Gamemode
 import dev.einsjannis.acacia.protocol.types.Position
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ClientData(var username: String? = null, var uuid: UUID? = null) {
@@ -160,4 +161,7 @@ class Test(val scope: CoroutineScope, ip: String, port: Int) {
             }
         }
     }
+}
+fun main() {
+    Test(GlobalScope, "127.0.0.1",26656).run()
 }

@@ -2,6 +2,7 @@ package dev.einsjannis.acacia.protocol.types
 
 import dev.einsjannis.acacia.protocol.io.PrimitiveReader
 import dev.einsjannis.acacia.protocol.io.PrimitiveWriter
+import kotlin.jvm.JvmName
 
 sealed class Palette<BS> {
     abstract fun getIdForState(state: BS): UInt
@@ -37,11 +38,11 @@ private constructor(
         get() = NetworkIndexedPalette.ofMap(mapping)
 
     companion object {
-        fun <BS> ofMap(globalPalette: GlobalPalette<BS>, map: Map<UInt, UInt>) =
+        fun <BS> ofUIntMap(globalPalette: GlobalPalette<BS>, map: Map<UInt, UInt>) =
             IndexedPalette(globalPalette, map, map.map { (k, v) -> v to k }.toMap())
 
         fun <BS> ofMap(globalPalette: GlobalPalette<BS>, map: Map<UInt, BS>) =
-            ofMap(globalPalette, map.map { (k, v) -> k to globalPalette.getIdForState(v) }.toMap())
+            ofUIntMap(globalPalette, map.map { (k, v) -> k to globalPalette.getIdForState(v) }.toMap())
 
         fun <BS> ofBlockStates(globalPalette: GlobalPalette<BS>, list: List<BS>) =
             ofMap<BS>(globalPalette, list.withIndex().map {
@@ -91,7 +92,7 @@ class NetworkIndexedPalette private constructor(
     override val bitsPerBlock: Int = (32 - mapping.size.countLeadingZeroBits()).coerceAtLeast(4)
 
     override fun <BS> bind(globalPalette: GlobalPalette<BS>): Palette<BS> =
-        IndexedPalette.ofMap(globalPalette, mapping)
+        IndexedPalette.ofUIntMap(globalPalette, mapping)
 
 
 }
