@@ -22,7 +22,7 @@ abstract class PacketObject {
 
     private val _delegates = mutableListOf<BaseDelegate<*>>()
 
-    private fun <T : BaseDelegate<E>, E> delegate(d: T): T {
+    protected fun <T : BaseDelegate<E>, E> delegate(d: T): T {
         _delegates.add(d)
         return d
     }

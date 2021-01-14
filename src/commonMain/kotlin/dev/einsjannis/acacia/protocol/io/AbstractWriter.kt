@@ -7,8 +7,6 @@ import dev.einsjannis.acacia.protocol.primitives.chat.ChatSerializer
 import dev.einsjannis.acacia.protocol.primitives.nbt.*
 import dev.einsjannis.acacia.protocol.types.Position
 import dev.einsjannis.acacia.protocol.types.entity.EntityDataField
-import dev.einsjannis.runMultiplatformBlocking
-import kotlinx.coroutines.CoroutineScope
 import kotlin.experimental.or
 
 /**

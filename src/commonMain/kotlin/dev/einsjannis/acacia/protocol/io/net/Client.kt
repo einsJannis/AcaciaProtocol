@@ -11,7 +11,6 @@ import dev.einsjannis.acacia.protocol.exception.UnnecessaryCompressionException
 import dev.einsjannis.acacia.protocol.io.ByteArrayReader
 import dev.einsjannis.acacia.protocol.io.ByteArrayWriter
 import dev.einsjannis.acacia.protocol.primitives.chat.StringComponent
-import dev.einsjannis.runMultiplatformBlocking
 import dev.einsjannis.zlib.ZlibWrapper
 import io.ktor.network.sockets.Socket
 import io.ktor.network.sockets.isClosed
@@ -19,6 +18,7 @@ import io.ktor.network.sockets.openReadChannel
 import io.ktor.network.sockets.openWriteChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import dev.einsjannis.acacia.protocol.packet.login.clientbound.Disconnect as LoginDisconnect
@@ -52,9 +52,9 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
         outboundJob = scope.launch { handleOutbound() }
     }
 
-    open fun shutdownGracefully(sendDisconnect: Boolean = false, disconnectMessage: String = "Server shut down") {
-        if (state != State.RUNNING) return
-        scope.runMultiplatformBlocking {
+    open fun shutdownGracefully(sendDisconnect: Boolean = false, disconnectMessage: String = "Server shut down"): Job {
+        if (state != State.RUNNING) return scope.async { }
+        return scope.async {
             if (sendDisconnect && bound == Bound.SERVER) {
                 val reason = StringComponent(disconnectMessage)
                 if (connectionState == ConnectionState.LOGIN) send(LoginDisconnect.build { this.reason = reason })
@@ -150,10 +150,11 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
 
 class ServerClient<DATA>(scope: CoroutineScope, socket: Socket, val server: Server<DATA>, val data: DATA) : Client(scope, socket) {
     override val bound: Bound = Bound.SERVER
-    override fun shutdownGracefully(sendDisconnect: Boolean, disconnectMessage: String) {
+    override fun shutdownGracefully(sendDisconnect: Boolean, disconnectMessage: String): Job {
         server.connectedClients.remove(this)
-        super.shutdownGracefully(sendDisconnect, disconnectMessage)
+        return super.shutdownGracefully(sendDisconnect, disconnectMessage)
     }
+
     override suspend fun distributeInboundPacket(packet: Packet) {
         super.distributeInboundPacket(packet)
         server.incomingPackets.send(ClientIncomingPackage(this, packet))
