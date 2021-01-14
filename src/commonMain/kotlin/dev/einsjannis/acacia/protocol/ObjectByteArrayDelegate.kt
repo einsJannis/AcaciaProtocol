@@ -9,7 +9,7 @@ import dev.einsjannis.acacia.protocol.io.PrimitiveWriter
 class ObjectByteArrayDelegate<T>(val elementDelegate: BaseDelegate<T>) : BaseDelegate<List<T>>() {
     
     override fun write(writer: PrimitiveWriter, value: List<T>) {
-        val data = ByteArrayWriter(value.size)
+        val data = ByteArrayWriter(writer.scope, value.size)
         value.forEach { elementDelegate.write(data, it) }
         writer.writeVarInt(value.size)
         writer.writeByteArray(data.result)
@@ -17,7 +17,7 @@ class ObjectByteArrayDelegate<T>(val elementDelegate: BaseDelegate<T>) : BaseDel
     
     override fun read(reader: PrimitiveReader): List<T> {
         val size = reader.readVarInt()
-        val data = ByteArrayReader(reader.readByteArray(size))
+        val data = ByteArrayReader(reader.readByteArray(size), reader.scope)
         return buildList {
             while (data.remainingBytes != 0) {
                 try {

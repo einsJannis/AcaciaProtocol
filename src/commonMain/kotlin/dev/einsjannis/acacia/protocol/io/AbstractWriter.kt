@@ -7,12 +7,14 @@ import dev.einsjannis.acacia.protocol.primitives.chat.ChatSerializer
 import dev.einsjannis.acacia.protocol.primitives.nbt.*
 import dev.einsjannis.acacia.protocol.types.Position
 import dev.einsjannis.acacia.protocol.types.entity.EntityDataField
+import dev.einsjannis.runMultiplatformBlocking
+import kotlinx.coroutines.CoroutineScope
 import kotlin.experimental.or
 
 /**
  * Abstract implementation for a [PrimitiveWriter]
  */
-abstract class AbstractWriter : PrimitiveWriter {
+abstract class AbstractWriter(override val scope: CoroutineScope) : PrimitiveWriter {
     
     /**
      * Writes a Boolean as a Byte.
@@ -103,17 +105,8 @@ abstract class AbstractWriter : PrimitiveWriter {
     /**
      * Writes a Int as a VarInt.
      */
-    override fun writeVarInt(value: Int) {
-        var work = value
-        do {
-            var temp = (work and 0b01111111).toByte()
-            work = work ushr 7
-            if (work != 0) {
-                temp = temp or 0b10000000.toByte()
-            }
-            writeByte(temp)
-        } while (work != 0)
-    }
+    override fun writeVarInt(value: Int) =
+        scope.runMultiplatformBlocking { writeVarInt(::writeByte, value) }
     
     /**
      * Writes a Long as a VarLong.

@@ -1,17 +1,12 @@
 package dev.einsjannis.acacia.protocol.io.net
 
-import dev.einsjannis.acacia.protocol.Bound
-import dev.einsjannis.acacia.protocol.ConnectionState
-import dev.einsjannis.acacia.protocol.Packet
-import dev.einsjannis.acacia.protocol.PacketMeta
+import dev.einsjannis.acacia.protocol.*
 import dev.einsjannis.acacia.protocol.exception.NoConnectionException
 import dev.einsjannis.acacia.protocol.exception.UnexpectedDecompressedLengthException
 import dev.einsjannis.acacia.protocol.exception.UnnecessaryCompressionException
 import dev.einsjannis.acacia.protocol.io.ByteArrayReader
 import dev.einsjannis.acacia.protocol.io.ByteArrayWriter
 import dev.einsjannis.acacia.protocol.primitives.chat.StringComponent
-import dev.einsjannis.acacia.protocol.readVarInt
-import dev.einsjannis.acacia.protocol.writeVarInt
 import dev.einsjannis.zlib.ZlibWrapper
 import io.ktor.network.sockets.Socket
 import io.ktor.network.sockets.isClosed
@@ -75,7 +70,7 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
             val packetSize = reader.readVarInt()
             val bytes = ByteArray(packetSize)
             reader.readAvailable(bytes, 0, packetSize)
-            val byteReader = ByteArrayReader(bytes)
+            val byteReader = ByteArrayReader(bytes, scope)
             val packet = if (compressionThreshold > 0) {
                 val dataLength = byteReader.readVarInt()
                 if (dataLength == 0) {
@@ -104,7 +99,7 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
             if (socket.isClosed) return
             val uncompressedBytes = encodePacket(data)
             val toWrite = if (compressionThreshold > 0) {
-                ByteArrayWriter().also { baw ->
+                ByteArrayWriter(scope).also { baw ->
                     baw.writeVarInt(uncompressedBytes.size)
                     if (uncompressedBytes.size > compressionThreshold) {
                         val compressedBytes = ZlibWrapper.compress(uncompressedBytes.result)
@@ -128,13 +123,13 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
     }
 
     suspend fun decodePacket(bytes: ByteArray): Packet {
-        val byteArrayReader = ByteArrayReader(bytes)
+        val byteArrayReader = ByteArrayReader(bytes, scope)
         val id = byteArrayReader.readVarInt()
         return Packet.read(id, connectionState, bound, byteArrayReader)
     }
 
     suspend fun <T : Packet> encodePacket(packet: PacketWithMeta<T>): ByteArrayWriter {
-        val byteArrayWriter = ByteArrayWriter()
+        val byteArrayWriter = ByteArrayWriter(scope)
         byteArrayWriter.writeVarInt(packet.meta.id)
         packet.meta.writePacket(byteArrayWriter, packet.p)
         return byteArrayWriter

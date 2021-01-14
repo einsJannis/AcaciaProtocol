@@ -7,11 +7,14 @@ import dev.einsjannis.acacia.protocol.types.entity.EntityDataField
 import dev.einsjannis.acacia.protocol.primitives.nbt.NbtTag
 import dev.einsjannis.acacia.protocol.types.Position
 import dev.einsjannis.acacia.protocol.primitives.nbt.SlotData
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Declaration of functions to write primitives of the minecraft protocol.
  */
 interface PrimitiveWriter {
+    
+    val scope: CoroutineScope
     
     /**
      * Writes a Boolean. True should be encoded as 0x01 and flase should be encoded as 0x00.
