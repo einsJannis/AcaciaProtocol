@@ -3,7 +3,7 @@ package dev.einsjannis.acacia.protocol.io
 import kotlinx.coroutines.CoroutineScope
 import kotlin.math.max
 
-class ByteArrayWriter(scope: CoroutineScope, capacity: Int = 0) : AbstractWriter(scope) {
+class ByteArrayWriter(capacity: Int = 0) : AbstractWriter() {
 
     var _result: ByteArray = ByteArray(capacity)
     val result get() = _result.sliceArray(0 until size)

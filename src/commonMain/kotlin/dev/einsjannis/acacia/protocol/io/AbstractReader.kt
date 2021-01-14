@@ -7,18 +7,13 @@ import dev.einsjannis.acacia.protocol.primitives.chat.ChatSerializer
 import dev.einsjannis.acacia.protocol.primitives.nbt.*
 import dev.einsjannis.acacia.protocol.types.Position
 import dev.einsjannis.acacia.protocol.types.entity.*
-import dev.einsjannis.runMultiplatformBlocking
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlin.experimental.and
 
 /**
  * Abstract implementation of [PrimitiveReader]
  */
-abstract class AbstractReader(override val scope: CoroutineScope) : PrimitiveReader {
-    
+abstract class AbstractReader : PrimitiveReader {
+
     /**
      * Reads a Byte as a Boolean.
      */
@@ -96,18 +91,32 @@ abstract class AbstractReader(override val scope: CoroutineScope) : PrimitiveRea
      * Reads a String as a ChatComponent.
      */
     override fun readChat(): ChatComponent = ChatSerializer.fromString(readString())
-    
+
     /**
      * Reads a String as a Identifier
      */
     override fun readIdentifier(): Identifier = Identifier.from(readString())
-    
+
     /**
      * Reads Bytes as a Int.
      */
-    override fun readVarInt(): Int =
-        scope.runMultiplatformBlocking { readVarInt(::readByte) }
-    
+    override fun readVarInt(): Int {
+        var numRead = 0
+        var result = 0
+        var read: Byte
+        do {
+            read = readByte()
+            val value: Int = (read and 127).toInt()
+            result = result or (value shl 7 * numRead)
+            numRead++
+            if (numRead > 5) {
+                throw RuntimeException("VarInt is too big")
+            }
+        } while (read and 128.toByte() != 0.toByte())
+        return result
+    }
+
+
     /**
      * Reads Bytes as a Long.
      */

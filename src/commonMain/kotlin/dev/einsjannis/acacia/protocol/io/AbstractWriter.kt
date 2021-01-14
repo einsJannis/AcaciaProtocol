@@ -14,7 +14,7 @@ import kotlin.experimental.or
 /**
  * Abstract implementation for a [PrimitiveWriter]
  */
-abstract class AbstractWriter(override val scope: CoroutineScope) : PrimitiveWriter {
+abstract class AbstractWriter : PrimitiveWriter {
     
     /**
      * Writes a Boolean as a Byte.
@@ -105,8 +105,17 @@ abstract class AbstractWriter(override val scope: CoroutineScope) : PrimitiveWri
     /**
      * Writes a Int as a VarInt.
      */
-    override fun writeVarInt(value: Int) =
-        scope.runMultiplatformBlocking { writeVarInt(::writeByte, value) }
+    override fun writeVarInt(value: Int) {
+        var work = value
+        do {
+            var temp = (work and 0b01111111).toByte()
+            work = work ushr 7
+            if (work != 0) {
+                temp = temp or 0b10000000.toByte()
+            }
+            writeByte(temp)
+        } while (work != 0)
+    }
     
     /**
      * Writes a Long as a VarLong.

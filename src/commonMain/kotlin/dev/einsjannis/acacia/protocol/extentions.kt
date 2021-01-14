@@ -2,20 +2,11 @@ package dev.einsjannis.acacia.protocol
 
 import dev.einsjannis.acacia.protocol.exception.InvalidPacketObjectException
 import dev.einsjannis.acacia.protocol.primitives.Flags
-import io.ktor.utils.io.*
-import kotlin.experimental.and
-import kotlin.experimental.or
 
 inline fun <reified T : Enum<T>> BaseDelegate<Int>.enumOrdinalMapping() =
     mapped({ enumValues<T>()[it] }, { it.ordinal })
 
 fun <T : Flags> BaseDelegate<Int>.bitFlag(con: (Int) -> T) = mapped<T>(con, { it.value })
-
-suspend fun ByteReadChannel.readVarInt(): Int =
-    dev.einsjannis.acacia.protocol.io.readVarInt(::readByte)
-
-suspend fun ByteWriteChannel.writeVarInt(value: Int) =
-    dev.einsjannis.acacia.protocol.io.writeVarInt(::writeByte, value)
 
 
 fun <T : PacketObject> T.build(builder: T.() -> Unit): T {

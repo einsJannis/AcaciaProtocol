@@ -3,7 +3,7 @@ package dev.einsjannis.acacia.protocol.io
 import dev.einsjannis.acacia.protocol.exception.NotEnoughBytesLeftException
 import kotlinx.coroutines.CoroutineScope
 
-class ByteArrayReader(val data: ByteArray, scope: CoroutineScope) : AbstractReader(scope) {
+class ByteArrayReader(val data: ByteArray) : AbstractReader() {
 
     var index = 0
 

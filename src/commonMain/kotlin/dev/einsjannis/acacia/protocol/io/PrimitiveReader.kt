@@ -14,8 +14,6 @@ import kotlinx.coroutines.CoroutineScope
  */
 interface PrimitiveReader {
     
-    val scope: CoroutineScope
-    
     /**
      * Reads a Boolean. True should be encoded as 0x01 and flase should be encoded as 0x00
      */

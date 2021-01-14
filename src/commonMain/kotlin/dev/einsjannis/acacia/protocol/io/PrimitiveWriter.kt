@@ -13,9 +13,7 @@ import kotlinx.coroutines.CoroutineScope
  * Declaration of functions to write primitives of the minecraft protocol.
  */
 interface PrimitiveWriter {
-    
-    val scope: CoroutineScope
-    
+
     /**
      * Writes a Boolean. True should be encoded as 0x01 and flase should be encoded as 0x00.
      */
