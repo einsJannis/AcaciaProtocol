@@ -1,6 +1,7 @@
 package dev.einsjannis.acacia.protocol.io.net
 
 import dev.einsjannis.acacia.protocol.Packet
+import dev.einsjannis.runMultiplatformBlocking
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.ServerSocket
 import io.ktor.network.sockets.aSocket
@@ -40,8 +41,10 @@ class Server<CLIENTDATA>(
         }
     }
 
-    fun shutdownGracefully() {
+    fun shutdownGracefully(sendDisconnect: Boolean = true, disconnectMessage: String = "Server shut down") {
+        connectedClients.forEach { it.shutdownGracefully(sendDisconnect, disconnectMessage) }
         running = false
+        scope.runMultiplatformBlocking { job?.join() }
     }
 
 }
