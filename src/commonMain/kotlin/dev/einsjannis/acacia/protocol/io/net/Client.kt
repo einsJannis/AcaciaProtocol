@@ -16,6 +16,7 @@ import io.ktor.network.sockets.Socket
 import io.ktor.network.sockets.isClosed
 import io.ktor.network.sockets.openReadChannel
 import io.ktor.network.sockets.openWriteChannel
+import io.ktor.utils.io.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -68,30 +69,45 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
             socket.close()
         }
     }
+    
+    suspend fun frameIncoming(byteReadChannel: ByteReadChannel): ByteArray {
+        val packetByteArray = ByteArray(3)
+        val packetSizeLength = byteReadChannel.readAvailable(packetByteArray, 0, 3)
+        val sizeReader = ByteArrayReader(packetByteArray.copyOfRange(0, packetSizeLength))
+        val packetSize = sizeReader.readVarInt()
+        val bytes = ByteArray(packetSize)
+        byteReadChannel.readAvailable(bytes, sizeReader.remainingBytes, packetSize - sizeReader.remainingBytes)
+        sizeReader.data.copyInto(bytes, 0, sizeReader.index)
+        return bytes
+    }
+    
+    suspend fun decompressIncoming(dataLength: Int, framedByteReader: ByteArrayReader): ByteArray {
+        if (dataLength < compressionThreshold && closeOnUnnecessaryCompression) {
+            shutdownGracefully()
+            throw UnnecessaryCompressionException(compressionThreshold, dataLength, bound)
+        }
+        val decompressedBytes = ZlibWrapper.uncompress(framedByteReader.readByteArray(framedByteReader.remainingBytes))
+        if (decompressedBytes.size != dataLength) throw UnexpectedDecompressedLengthException(dataLength, decompressedBytes.size, framedByteReader.data, decompressedBytes)
+        return decompressedBytes
+    }
+    
+    suspend fun decodePacket(bytes: ByteArray): Packet {
+        val byteArrayReader = ByteArrayReader(bytes)
+        val id = byteArrayReader.readVarInt()
+        return Packet.read(id, connectionState, bound, byteArrayReader)
+    }
 
     suspend fun handleInbound() {
         val reader = socket.openReadChannel()
         while (!socket.isClosed && state == State.RUNNING) {
-            val packetByteArray = ByteArray(3)
-            val packetSizeLength = reader.readAvailable(packetByteArray, 0, 3)
-            val sizeReader = ByteArrayReader(packetByteArray.copyOfRange(0, packetSizeLength))
-            val packetSize = sizeReader.readVarInt()
-            val bytes = ByteArray(packetSize)
-            reader.readAvailable(bytes, sizeReader.remainingBytes, packetSize - sizeReader.remainingBytes)
-            sizeReader.data.copyInto(bytes, 0, sizeReader.index)
-            val byteReader = ByteArrayReader(bytes)
+            val bytes = frameIncoming(reader)
             val packet = if (compressionThreshold > 0) {
-                val dataLength = byteReader.readVarInt()
+                val framedByteReader = ByteArrayReader(bytes)
+                val dataLength = framedByteReader.readVarInt()
                 if (dataLength == 0) {
-                    decodePacket(byteReader.readByteArray(byteReader.remainingBytes))
+                    decodePacket(framedByteReader.readByteArray(framedByteReader.remainingBytes))
                 } else {
-                    if (dataLength < compressionThreshold && closeOnUnnecessaryCompression) {
-                        shutdownGracefully()
-                        throw UnnecessaryCompressionException(compressionThreshold, dataLength, bound)
-                    }
-                    val decompressedBytes = ZlibWrapper.uncompress(byteReader.readByteArray(byteReader.remainingBytes))
-                    if (decompressedBytes.size != dataLength) throw UnexpectedDecompressedLengthException(dataLength, decompressedBytes.size, bytes, decompressedBytes)
-                    decodePacket(decompressedBytes)
+                    decodePacket(decompressIncoming(dataLength, framedByteReader))
                 }
             } else decodePacket(bytes)
             distributeInboundPacket(packet)
@@ -131,12 +147,6 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
     suspend inline fun <reified T : Packet> send(packet: T) {
         if (state != State.RUNNING) throw NoConnectionException(this)
         outboundChannel.send(PacketWithMeta(packet, Packet.packetMeta()))
-    }
-
-    suspend fun decodePacket(bytes: ByteArray): Packet {
-        val byteArrayReader = ByteArrayReader(bytes)
-        val id = byteArrayReader.readVarInt()
-        return Packet.read(id, connectionState, bound, byteArrayReader)
     }
 
     suspend fun <T : Packet> encodePacket(packet: PacketWithMeta<T>): ByteArrayWriter {
