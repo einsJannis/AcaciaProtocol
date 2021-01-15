@@ -30,14 +30,16 @@ class Server<CLIENTDATA>(
         running = true
         job = scope.launch {
             serverSocket = aSocket(SelectorManager(scope.coroutineContext)).tcp().bind(NetworkAddress(ip, port))
-            while (running) {
-                val socket = serverSocket!!.accept()
-                val client = ServerClient(scope, socket, this@Server, dataConstructor())
-                connectedClients.add(client)
-                client.run()
-            }
+            while (running) listen()
             serverSocket!!.close()
         }
+    }
+
+    private suspend fun listen() {
+        val socket = serverSocket!!.accept()
+        val client = ServerClient(scope, socket, this@Server, dataConstructor())
+        connectedClients.add(client)
+        client.run()
     }
 
     fun shutdownGracefully(sendDisconnect: Boolean = true, disconnectMessage: String = "Server shut down") {

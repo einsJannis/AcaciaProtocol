@@ -28,6 +28,7 @@ import dev.einsjannis.acacia.protocol.packet.play.clientbound.Disconnect as Play
 data class PacketWithMeta<T : Packet>(val p: T, val meta: PacketMeta<T>)
 
 open class Client(val scope: CoroutineScope, val socket: Socket) {
+
     enum class State {
         RUNNING,
         CLOSING,
@@ -70,7 +71,7 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
         }
     }
     
-    suspend fun frameIncoming(byteReadChannel: ByteReadChannel): ByteArray {
+    private suspend fun frameIncoming(byteReadChannel: ByteReadChannel): ByteArray {
         val packetByteArray = ByteArray(3)
         val packetSizeLength = byteReadChannel.readAvailable(packetByteArray, 0, 3)
         val sizeReader = ByteArrayReader(packetByteArray.copyOfRange(0, packetSizeLength))
@@ -81,7 +82,7 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
         return bytes
     }
     
-    suspend fun decompressIncoming(dataLength: Int, framedByteReader: ByteArrayReader): ByteArray {
+    private suspend fun decompressIncoming(dataLength: Int, framedByteReader: ByteArrayReader): ByteArray {
         if (dataLength < compressionThreshold && closeOnUnnecessaryCompression) {
             shutdownGracefully()
             throw UnnecessaryCompressionException(compressionThreshold, dataLength, bound)
@@ -91,13 +92,13 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
         return decompressedBytes
     }
     
-    suspend fun decodePacket(bytes: ByteArray): Packet {
+    private suspend fun decodePacket(bytes: ByteArray): Packet {
         val byteArrayReader = ByteArrayReader(bytes)
         val id = byteArrayReader.readVarInt()
         return Packet.read(id, connectionState, bound, byteArrayReader)
     }
 
-    suspend fun handleInbound() {
+    private suspend fun handleInbound() {
         val reader = socket.openReadChannel()
         while (!socket.isClosed && state == State.RUNNING) {
             val bytes = frameIncoming(reader)
@@ -118,28 +119,37 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
         inboundChannel.send(packet)
     }
 
-    suspend fun handleOutbound() {
+    private suspend fun <T : Packet> encodePacket(packet: PacketWithMeta<T>): ByteArrayWriter {
+        val byteArrayWriter = ByteArrayWriter()
+        byteArrayWriter.writeVarInt(packet.meta.id)
+        packet.meta.writePacket(byteArrayWriter, packet.p)
+        return byteArrayWriter
+    }
+
+    private suspend fun compressOutgoing(uncompressedBytes: ByteArrayWriter) = ByteArrayWriter().also { baw ->
+        baw.writeVarInt(uncompressedBytes.size)
+        if (uncompressedBytes.size > compressionThreshold) {
+            val compressedBytes = ZlibWrapper.compress(uncompressedBytes.result)
+            baw.writeByteArray(compressedBytes)
+        } else {
+            baw.writeByteArray(uncompressedBytes._result, 0, uncompressedBytes.size)
+        }
+    }
+
+    private suspend fun frameOutgoing(toWrite: ByteArrayWriter, writer: ByteWriteChannel) {
+        val sizeWriter = ByteArrayWriter(3)
+        sizeWriter.writeVarInt(toWrite.size)
+        writer.writeAvailable(sizeWriter._result, 0, sizeWriter.size)
+        writer.writeAvailable(toWrite._result, 0, toWrite.size)
+    }
+
+    private suspend fun handleOutbound() {
         val writer = socket.openWriteChannel(autoFlush = false)
         for (data in outboundChannel) {
             if (socket.isClosed) return
             val uncompressedBytes = encodePacket(data)
-            val toWrite = if (compressionThreshold > 0) {
-                ByteArrayWriter().also { baw ->
-                    baw.writeVarInt(uncompressedBytes.size)
-                    if (uncompressedBytes.size > compressionThreshold) {
-                        val compressedBytes = ZlibWrapper.compress(uncompressedBytes.result)
-                        baw.writeByteArray(compressedBytes)
-                    } else {
-                        baw.writeByteArray(uncompressedBytes._result, 0, uncompressedBytes.size)
-                    }
-                }
-            } else {
-                uncompressedBytes
-            }
-            val sizeWriter = ByteArrayWriter(3)
-            sizeWriter.writeVarInt(toWrite.size)
-            writer.writeAvailable(sizeWriter._result, 0, sizeWriter.size)
-            writer.writeAvailable(toWrite._result, 0, toWrite.size)
+            val toWrite = if (compressionThreshold > 0) compressOutgoing(uncompressedBytes) else uncompressedBytes
+            frameOutgoing(toWrite, writer)
             writer.flush()
         }
     }
@@ -149,17 +159,12 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
         outboundChannel.send(PacketWithMeta(packet, Packet.packetMeta()))
     }
 
-    suspend fun <T : Packet> encodePacket(packet: PacketWithMeta<T>): ByteArrayWriter {
-        val byteArrayWriter = ByteArrayWriter()
-        byteArrayWriter.writeVarInt(packet.meta.id)
-        packet.meta.writePacket(byteArrayWriter, packet.p)
-        return byteArrayWriter
-    }
-
 }
 
 class ServerClient<DATA>(scope: CoroutineScope, socket: Socket, val server: Server<DATA>, val data: DATA) : Client(scope, socket) {
+
     override val bound: Bound = Bound.SERVER
+
     override fun shutdownGracefully(sendDisconnect: Boolean, disconnectMessage: String): Job {
         server.connectedClients.remove(this)
         return super.shutdownGracefully(sendDisconnect, disconnectMessage)
@@ -169,4 +174,5 @@ class ServerClient<DATA>(scope: CoroutineScope, socket: Socket, val server: Serv
         super.distributeInboundPacket(packet)
         server.incomingPackets.send(ClientIncomingPackage(this, packet))
     }
+
 }
