@@ -1,5 +1,6 @@
 package dev.einsjannis.acacia.protocol.io.net
 
+import com.soywiz.krypto.AES
 import dev.einsjannis.acacia.protocol.Bound
 import dev.einsjannis.acacia.protocol.ConnectionState
 import dev.einsjannis.acacia.protocol.Packet
@@ -37,6 +38,8 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
     }
 
     open val bound = Bound.CLIENT
+    
+    var cipherKey: ByteArray? = null
 
     var closeOnUnnecessaryCompression: Boolean = false
     var connectionState: ConnectionState = ConnectionState.HANDSHAKE
@@ -73,8 +76,9 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
     }
     
     private suspend fun decryptIncoming(byteReadChannel: ByteReadChannel): ByteArrayReader {
-        val buffer = ByteArray(byteReadChannel.availableForRead)
+        var buffer = ByteArray(byteReadChannel.availableForRead)
         byteReadChannel.readAvailable(buffer)
+        cipherKey?.let { buffer = AES.decryptAes128Cbc(buffer, it) }
         return ByteArrayReader(buffer)
     }
     
@@ -140,16 +144,15 @@ open class Client(val scope: CoroutineScope, val socket: Socket) {
         }
     }
 
-    private suspend fun frameOutgoing(toWrite: ByteArrayWriter): ByteArrayWriter {
+    private suspend fun frameOutgoing(toWrite: ByteArrayWriter): ByteArray {
         val writer = ByteArrayWriter(3)
         writer.writeVarInt(toWrite.size)
         writer.writeByteArray(toWrite._result, 0, toWrite.size)
-        return writer
+        return writer.result
     }
     
-    private suspend fun encryptOutgoing(toEncrypt: ByteArrayWriter): ByteArray {
-        return toEncrypt.result
-    }
+    private suspend fun encryptOutgoing(toEncrypt: ByteArray): ByteArray =
+        cipherKey?.let { AES.encryptAes128Cbc(toEncrypt, it) } ?: toEncrypt
 
     private suspend fun handleOutbound() {
         val writer = socket.openWriteChannel(autoFlush = false)

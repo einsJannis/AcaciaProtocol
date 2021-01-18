@@ -42,6 +42,7 @@ kotlin {
             dependencies {
                 implementation("io.ktor:ktor-network:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
+                implementation("com.soywiz.korlibs.krypto:krypto:2.0.3")
             }
         }
         val commonTest by getting {
