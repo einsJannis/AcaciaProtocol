@@ -3,7 +3,7 @@
 This is a Kotlin multiplatform library with which you can easily interface with the networking protocol of the
 Minecraft Java edition.
 
-# Why Acacia Protocol
+## Why Acacia Protocol
 
 This allows you to easily implement a Minecraft server/client without creating hundrets of packet classes and worrying 
 about networking at all.
