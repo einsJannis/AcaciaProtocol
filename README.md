@@ -1,3 +1,7 @@
+# This repository
+
+This repository contains my second attempt at creating a Library for the Minecraft server protocol.
+
 # Acacia Protocol **!!!WIP!!!**
 
 This is a Kotlin multiplatform library with which you can easily interface with the networking protocol of the
